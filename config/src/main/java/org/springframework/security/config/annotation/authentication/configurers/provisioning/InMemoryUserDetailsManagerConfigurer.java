@@ -27,11 +27,14 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
  * to have in memory authentication. It also allows easily adding users to the in memory
  * authentication.
  *
+ * 它用于配置一个AuthenticationManagerBuilder,但是很显然,AuthenticationManagerBuilder 被代理到 ProviderManagerBuilder, 也就是最终AuthenticationManager 会代理ProviderManager 进行验证 ...
+ *
  * @param <B> the type of the {@link ProviderManagerBuilder} that is being configured
  * @author Rob Winch
  * @since 3.2
  */
 public class InMemoryUserDetailsManagerConfigurer<B extends ProviderManagerBuilder<B>>
+		// 并且它也继承了 UserDetailsManager 构建器
 		extends UserDetailsManagerConfigurer<B, InMemoryUserDetailsManagerConfigurer<B>> {
 
 	/**

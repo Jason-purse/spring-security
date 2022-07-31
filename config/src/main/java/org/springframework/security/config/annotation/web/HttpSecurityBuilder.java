@@ -44,6 +44,8 @@ import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SessionManagementFilter;
 
 /**
+ * 它的意思就是为 HttpSecurity 配置  DefaultSecurityFilterChain
+ *
  * @param <H>
  * @author Rob Winch
  */

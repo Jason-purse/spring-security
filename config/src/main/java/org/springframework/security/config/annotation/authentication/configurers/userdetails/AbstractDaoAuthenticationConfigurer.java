@@ -26,18 +26,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Allows configuring a {@link DaoAuthenticationProvider}
+ * 配置一个 DaoAuthenticationProvider(它是核心的基于用户密码的认证提供器)
+ * 这里同样通过 Configurer的形式 绑定给AuthenticationManager  ..
+ * 在使用UserDetailsManager的时候,被 DaoAuthenticationProvider代理了 ...
  *
  * @param <B> the type of the {@link SecurityBuilder}
  * @param <C> the type of {@link AbstractDaoAuthenticationConfigurer} this is
  * @param <U> The type of {@link UserDetailsService} that is being used
  * @author Rob Winch
  * @since 3.2
+ *
+ * 由于 UserDetailsService 是抽象化的,我们继续抽象 ..所以 U 还是泛型 ...
  */
 public abstract class AbstractDaoAuthenticationConfigurer<B extends ProviderManagerBuilder<B>, C extends AbstractDaoAuthenticationConfigurer<B, C, U>, U extends UserDetailsService>
 		extends UserDetailsAwareConfigurer<B, U> {
 
+	// 我们可以发现,它在这里默认构造了DaoAuthenticationProvider ..
 	private DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 
+	// 以及userDetailService
 	private final U userDetailsService;
 
 	/**
@@ -48,11 +55,14 @@ public abstract class AbstractDaoAuthenticationConfigurer<B extends ProviderMana
 		this.userDetailsService = userDetailsService;
 		this.provider.setUserDetailsService(userDetailsService);
 		if (userDetailsService instanceof UserDetailsPasswordService) {
+			// 两种类型的UserDetailsService ...
 			this.provider.setUserDetailsPasswordService((UserDetailsPasswordService) userDetailsService);
 		}
 	}
 
 	/**
+	 * 可以进行后置处理(对构造的对象) ...
+	 *
 	 * Adds an {@link ObjectPostProcessor} for this class.
 	 * @param objectPostProcessor
 	 * @return the {@link AbstractDaoAuthenticationConfigurer} for further customizations
@@ -82,7 +92,10 @@ public abstract class AbstractDaoAuthenticationConfigurer<B extends ProviderMana
 
 	@Override
 	public void configure(B builder) throws Exception {
+		// 配置的时候,就会进行 后置处理 ....
 		this.provider = postProcess(this.provider);
+		// 例如这个为AuthenticationManager构建器增加了 AuthenticationProvider
+		// 由于ProviderManager ...代理了AuthenticationManager 接口,所以看起来是为 ProviderManager 增加AuthenticationProvider ..
 		builder.authenticationProvider(this.provider);
 	}
 

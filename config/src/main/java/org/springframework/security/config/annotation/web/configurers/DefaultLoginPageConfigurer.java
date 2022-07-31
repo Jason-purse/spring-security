@@ -69,12 +69,19 @@ import org.springframework.security.web.csrf.CsrfToken;
 public final class DefaultLoginPageConfigurer<H extends HttpSecurityBuilder<H>>
 		extends AbstractHttpConfigurer<DefaultLoginPageConfigurer<H>, H> {
 
+	/**
+	 * 登录 页面生成 过滤器
+	 */
 	private DefaultLoginPageGeneratingFilter loginPageGeneratingFilter = new DefaultLoginPageGeneratingFilter();
 
+	/**
+	 * 登出 页面生成 过滤器
+	 */
 	private DefaultLogoutPageGeneratingFilter logoutPageGeneratingFilter = new DefaultLogoutPageGeneratingFilter();
 
 	@Override
 	public void init(H http) {
+		// 这个解析隐藏输入 ...
 		this.loginPageGeneratingFilter.setResolveHiddenInputs(DefaultLoginPageConfigurer.this::hiddenInputs);
 		this.logoutPageGeneratingFilter.setResolveHiddenInputs(DefaultLoginPageConfigurer.this::hiddenInputs);
 		http.setSharedObject(DefaultLoginPageGeneratingFilter.class, this.loginPageGeneratingFilter);
@@ -94,6 +101,8 @@ public final class DefaultLoginPageConfigurer<H extends HttpSecurityBuilder<H>>
 		if (exceptionConf != null) {
 			authenticationEntryPoint = exceptionConf.getAuthenticationEntryPoint();
 		}
+
+		// 也就是在这里,判断出了,如果异常处理没有认证端点,那么就直接启用登录页面生成过滤器  ...(使用系统默认的认证端点) ...
 		if (this.loginPageGeneratingFilter.isEnabled() && authenticationEntryPoint == null) {
 			this.loginPageGeneratingFilter = postProcess(this.loginPageGeneratingFilter);
 			http.addFilter(this.loginPageGeneratingFilter);

@@ -19,6 +19,11 @@ package org.springframework.security.config.annotation;
 /**
  * Interface for building an Object
  *
+ * 构建一个对象的接口 ....
+ *
+ * 构建者模式,最终构建一个对象 ..
+ *
+ * 我也不知道这是什么模式,但是用的确实厉害 ..
  * @param <O> The type of the Object being built
  * @author Rob Winch
  * @since 3.2

@@ -35,6 +35,7 @@ import org.springframework.web.context.ServletContextAware;
 /**
  * Allows users to determine whether they have privileges for a given web URI.
  *
+ * 允许用户去判断是否 对某个web URI 有权限 ...
  * @author Ben Alex
  * @author Luke Taylor
  * @since 3.0

@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * A class used to get all the {@link WebSecurityConfigurer} instances from the current
  * {@link ApplicationContext} but ignoring the parent.
  *
+ * 只从当前应用上下文中获取WebSecurityConfigurer ...
  * @author Rob Winch
  */
 public final class AutowiredWebSecurityConfigurersIgnoreParents {

@@ -30,6 +30,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * not yet configured and there is only a single Bean of that type. Optionally, if a
  * {@link PasswordEncoder} is defined will wire this up too.
  *
+ * 懒惰的初始化全局认证(使用UserDetailsService), 如果(它没有配置并且仅仅是单个类型的bean)
+ * 如果密码编码器定义了,将它关联起来 ..
+ *
  * @author Rob Winch
  * @since 4.1
  */
@@ -56,15 +59,22 @@ class InitializeUserDetailsBeanManagerConfigurer extends GlobalAuthenticationCon
 
 		@Override
 		public void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+			// 也就是在配置的过程中,做什么事情 ...
 			if (auth.isConfigured()) {
 				return;
 			}
+			// 从bean中获取 ...
 			UserDetailsService userDetailsService = getBeanOrNull(UserDetailsService.class);
+			// 如果为空,则返回 ...
 			if (userDetailsService == null) {
 				return;
 			}
+			// 从ioc容器中获取 PasswordEncoder ..
 			PasswordEncoder passwordEncoder = getBeanOrNull(PasswordEncoder.class);
+			// 获取 UserDetailsPasswordService
 			UserDetailsPasswordService passwordManager = getBeanOrNull(UserDetailsPasswordService.class);
+			// 为什么这里又直接 new了 ...
 			DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 			provider.setUserDetailsService(userDetailsService);
 			if (passwordEncoder != null) {

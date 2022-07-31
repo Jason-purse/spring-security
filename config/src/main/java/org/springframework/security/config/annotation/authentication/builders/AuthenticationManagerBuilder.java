@@ -46,6 +46,11 @@ import org.springframework.util.Assert;
  * authentication, adding {@link UserDetailsService}, and adding
  * {@link AuthenticationProvider}'s.
  *
+ * 这是一个SecurityBuilder 被用来创建 AuthenticationManager,允许更加容易的构建内存中的验证,LDAP 验证,JDBC 验证,增加 UserDetailsService 以及增加AuthentProviders ...
+ *
+ * 最后要的是一个 AuthenticationManager, 但是构建器是 AuthenticationManagerBuilder ...
+ *
+ * 这个类实现 ProviderManagerBuilder的目的是它将具有增加ProviderManager到 AuthenticationManager的能力 ..
  * @author Rob Winch
  * @since 3.2
  */
@@ -55,14 +60,29 @@ public class AuthenticationManagerBuilder
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 认证管理器 ... 父类 ..
+	 */
 	private AuthenticationManager parentAuthenticationManager;
 
+	/**
+	 * 认证提供器 ..
+	 */
 	private List<AuthenticationProvider> authenticationProviders = new ArrayList<>();
 
+	/**
+	 * UserDetailsService
+	 */
 	private UserDetailsService defaultUserDetailsService;
 
+	/**
+	 * 擦除 凭证
+	 */
 	private Boolean eraseCredentials;
 
+	/**
+	 * 认证事件派发器
+	 */
 	private AuthenticationEventPublisher eventPublisher;
 
 	/**
@@ -77,6 +97,8 @@ public class AuthenticationManagerBuilder
 	 * Allows providing a parent {@link AuthenticationManager} that will be tried if this
 	 * {@link AuthenticationManager} was unable to attempt to authenticate the provided
 	 * {@link Authentication}.
+	 *
+	 * 当此认证管理器无法尝试认证提供的Authentication时,则允许提供的父类验证管理器尝试 ...
 	 * @param authenticationManager the {@link AuthenticationManager} that should be used
 	 * if the current {@link AuthenticationManager} was unable to attempt to authenticate
 	 * the provided {@link Authentication}.
@@ -92,6 +114,8 @@ public class AuthenticationManagerBuilder
 	}
 
 	/**
+	 *
+	 * 一般在 全局的AuthenticationManagerBuilder 暴露的时候,spring boot 自动暴露了一个 ...
 	 * Sets the {@link AuthenticationEventPublisher}
 	 * @param eventPublisher the {@link AuthenticationEventPublisher} to use
 	 * @return the {@link AuthenticationManagerBuilder} for further customizations
@@ -129,6 +153,8 @@ public class AuthenticationManagerBuilder
 	 */
 	public InMemoryUserDetailsManagerConfigurer<AuthenticationManagerBuilder> inMemoryAuthentication()
 			throws Exception {
+
+		// 为这个构建器应用 某一方面的定制(例如 UserDetailsManager)
 		return apply(new InMemoryUserDetailsManagerConfigurer<>());
 	}
 
@@ -218,13 +244,17 @@ public class AuthenticationManagerBuilder
 		this.authenticationProviders.add(authenticationProvider);
 		return this;
 	}
-
+	// 突然发现 AuthenticationManager 最终是一个 ProviderManager ..
 	@Override
 	protected ProviderManager performBuild() throws Exception {
+
+		// 在所有的东西配置到这个构建器之上之后 ...
 		if (!isConfigured()) {
 			this.logger.debug("No authenticationProviders and no parentAuthenticationManager defined. Returning null.");
 			return null;
 		}
+
+		// 自己直接返回一个 ProviderManager(虽然AuthenticationManager 代理了 ProviderManager,但仅仅只是配置的时候,进行内部联合调用关联而已) ...
 		ProviderManager providerManager = new ProviderManager(this.authenticationProviders,
 				this.parentAuthenticationManager);
 		if (this.eraseCredentials != null) {
@@ -233,6 +263,7 @@ public class AuthenticationManagerBuilder
 		if (this.eventPublisher != null) {
 			providerManager.setAuthenticationEventPublisher(this.eventPublisher);
 		}
+		// 将providerManager 也进行后置处理 ...
 		providerManager = postProcess(providerManager);
 		return providerManager;
 	}

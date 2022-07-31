@@ -39,6 +39,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
  * @since 3.2
  */
 public class UserDetailsManagerConfigurer<B extends ProviderManagerBuilder<B>, C extends UserDetailsManagerConfigurer<B, C>>
+		// 这是一个UserDetailsManager的定制
 		extends UserDetailsServiceConfigurer<B, C, UserDetailsManager> {
 
 	private final List<UserDetailsBuilder> userBuilders = new ArrayList<>();

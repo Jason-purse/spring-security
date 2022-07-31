@@ -18,6 +18,7 @@ package org.springframework.security.core.context;
 
 /**
  * A listener for {@link SecurityContextChangedEvent}s
+ * 安全上下文改变事件的监听器...
  *
  * @author Josh Cummings
  * @since 5.6

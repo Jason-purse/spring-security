@@ -30,9 +30,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 
 /**
+ * 首先先了解一下,启用全局认证注解是用来干嘛的 ,也就是 有了它才能够 注入全局的 AuthenticationManagerBuilder的实例 ..
+ * 如果不用这个注解,出现的未知问题,可能就是WebSecurityConfigurerAdapter的代码搞的鬼 ...
+ * 总而言之,只要你配置了这个注解,那么你就能够 定制全局的认证管理器Builder ...
+ *
+ *
+ *
  * The {@link EnableGlobalAuthentication} annotation signals that the annotated class can
  * be used to configure a global instance of {@link AuthenticationManagerBuilder}. For
  * example:
+ *
+ * 这个注解指示被注释的类能够被用来配置全局的 AuthenticationManagerBuilder的实例 ...
  *
  * <pre class="code">
  * &#064;Configuration
@@ -50,6 +58,8 @@ import org.springframework.security.config.annotation.web.servlet.configuration.
  * Annotations that are annotated with {@link EnableGlobalAuthentication} also signal that
  * the annotated class can be used to configure a global instance of
  * {@link AuthenticationManagerBuilder}. For example:
+ *
+ * 被这个注解注释的注解 也指示 这个注解的类能够被用来配置全局的 AuthenticationManagerBuilder ...
  *
  * <pre class="code">
  * &#064;Configuration

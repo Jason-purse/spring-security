@@ -40,6 +40,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 /**
  * {@link Configuration} that exposes the {@link HttpSecurity} bean.
  *
+ *
+ * 暴露一个 HttpSecurity Bean
  * @author Eleftheria Stein
  * @since 5.4
  */
@@ -84,6 +86,8 @@ class HttpSecurityConfiguration {
 				this.context);
 		AuthenticationManagerBuilder authenticationBuilder = new WebSecurityConfigurerAdapter.DefaultPasswordEncoderAuthenticationManagerBuilder(
 				this.objectPostProcessor, passwordEncoder);
+
+		// 将这个认证管理器的配置加到 当前定义的  AuthenticationManagerBuilder ...
 		authenticationBuilder.parentAuthenticationManager(authenticationManager());
 		HttpSecurity http = new HttpSecurity(this.objectPostProcessor, authenticationBuilder, createSharedObjects());
 		// @formatter:off
@@ -118,6 +122,10 @@ class HttpSecurityConfiguration {
 		}
 	}
 
+	/**
+	 * 它自己的 共享对象就只有一个应用上下文
+	 * @return
+	 */
 	private Map<Class<?>, Object> createSharedObjects() {
 		Map<Class<?>, Object> sharedObjects = new HashMap<>();
 		sharedObjects.put(ApplicationContext.class, this.context);

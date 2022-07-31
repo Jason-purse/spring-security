@@ -26,6 +26,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * Used by {@link org.springframework.security.web.FilterChainProxy} to handle an
  * <code>RequestRejectedException</code>.
  *
+ * 被FilterChainProxy 用来处理 请求拒绝的异常 ...
+ *
  * @author Leonard Brünings
  * @since 5.4
  */

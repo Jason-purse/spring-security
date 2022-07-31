@@ -52,10 +52,14 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract class that implements security interception for secure objects.
+ * 对于 secure 对象的 实现安全拦截的抽象类 ....
  * <p>
+ *     这个拦截器 将会确保 可能的安全拦截器的启动配置,它也实现了可能的secure 对象调用的正确执行 ... 比如说
  * The <code>AbstractSecurityInterceptor</code> will ensure the proper startup
  * configuration of the security interceptor. It will also implement the proper handling
  * of secure object invocations, namely:
+ * 	- 获取SecurityContextHolder中的Authentication ...对象
+ * 	- 如果这个请求是和一个secured 或者公共调用 - 通过 SecurityMetadataSource 查询  secure 对象请求 ...
  * <ol>
  * <li>Obtain the {@link Authentication} object from the
  * {@link SecurityContextHolder}.</li>

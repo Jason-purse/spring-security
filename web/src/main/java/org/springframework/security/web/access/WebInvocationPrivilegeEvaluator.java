@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 /**
  * Allows users to determine whether they have privileges for a given web URI.
  *
+ * 允许用户去判断 对于一个web URI 它们是否有权限访问  ...
  * @author Luke Taylor
  * @since 3.0
  */

@@ -87,11 +87,22 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
  * org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer = sample.MyClassThatExtendsAbstractHttpConfigurer, sample.OtherThatExtendsAbstractHttpConfigurer
  * </pre>
  *
+ * 尝试查看 WebSecurityConfigurerAdapter ...
+ * 它提供了一个方便的基类创建 WebSecurityConfigurer 实例, 这个实现 允许覆盖方法进行定制 ...
+ *
+ *
  * @author Rob Winch
  * @see EnableWebSecurity
  * @deprecated Use a {@link org.springframework.security.web.SecurityFilterChain} Bean to
  * configure {@link HttpSecurity} or a {@link WebSecurityCustomizer} Bean to configure
  * {@link WebSecurity}
+ *
+ *
+ * 现在已经不建议使用这个,而是直接使用 SecurityFilterChain 配置 HttpSecurity 或者通过 WebSecurityCustomizer Bean配置 WebSecurity ...
+ * 但是本质上,这个类就是一个 WebSecurityConfigurer<WebSecurity> ,想想也不知道为什么说这样的话 ...
+ *
+ * 由于它是一个 WebSecurityConfigurer,那么它包含了configure方法,这个方法在 构建器build的时候,会自行全部执行 ....
+ * 例如 构建 WebSecurity
  */
 @Order(100)
 @Deprecated
@@ -103,6 +114,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 
 	private ContentNegotiationStrategy contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
 
+	/**
+	 * 这是一个兜底后置处理器 .. 它应该会尝试注入一个新的
+	 */
 	private ObjectPostProcessor<Object> objectPostProcessor = new ObjectPostProcessor<Object>() {
 		@Override
 		public <T> T postProcess(T object) {
@@ -111,22 +125,49 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 		}
 	};
 
+	/**
+	 * 认证配置
+	 */
 	private AuthenticationConfiguration authenticationConfiguration;
 
+	/**
+	 * 认证管理器构建器
+	 */
 	private AuthenticationManagerBuilder authenticationBuilder;
 
+	/**
+	 * 局部的认证管理器配置器 ..(很显然这个应该是我们自己创建的)
+	 */
 	private AuthenticationManagerBuilder localConfigureAuthenticationBldr;
 
+	/**
+	 * 禁用本地配置 ...
+	 */
 	private boolean disableLocalConfigureAuthenticationBldr;
 
+	/**
+	 * 认证管理器是否初始化 ...
+	 */
 	private boolean authenticationManagerInitialized;
 
+	/**
+	 * 认证管理器 ...
+	 */
 	private AuthenticationManager authenticationManager;
 
+	/**
+	 * 认证评估解析器
+	 */
 	private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
 
+	/**
+	 * http security
+	 */
 	private HttpSecurity http;
 
+	/**
+	 * (默认配置) 是否禁用
+	 */
 	private boolean disableDefaults;
 
 	/**
@@ -141,7 +182,7 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * enabled. Disabling the default configuration should be considered more advanced
 	 * usage as it requires more understanding of how the framework is implemented.
 	 * @param disableDefaults true if the default configuration should be disabled, else
-	 * false
+	 * false(表示 默认配置应该被禁用,否则表示false)
 	 */
 	protected WebSecurityConfigurerAdapter(boolean disableDefaults) {
 		this.disableDefaults = disableDefaults;
@@ -153,6 +194,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * {@link AuthenticationManagerBuilder} should be used to specify the
 	 * {@link AuthenticationManager}.
 	 *
+	 * 它的意思就是,这个方法如果被覆盖(则表示用户的 authenticationManager构建是本地构建) 它默认是禁用的 ..
+	 * 所以它说需要覆盖方法通过此builder进行  authenticationManager的构建 ...
+	 *
 	 * <p>
 	 * The {@link #authenticationManagerBean()} method can be used to expose the resulting
 	 * {@link AuthenticationManager} as a Bean. The {@link #userDetailsServiceBean()} can
@@ -163,11 +207,16 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * {@link SecurityContextConfigurer} (i.e. RememberMeConfigurer )
 	 * </p>
 	 *
+	 * 然后 authenticationManagerBean 能够被用来暴露最终的 AuthenticationManager 作为一个 bean ..
+	 *
+	 *userDetailsServiceBean 方法能够被用来暴露最后收集的 UserDetailsService (它是由AuthenticationManagerBuilder创建的)作为一个bean ...
+	 * 这个UserDetailsService 将自动的收集到 HttpSecurity#getSharedObject(class) 能够被其他的SecurityContextConfigurer 共用 ... 例如 RememberMeConfigurer ...
+	 * 当然这是默认行为,你可以选择 覆盖暴露自己的自定义bean ...
 	 * <p>
 	 * For example, the following configuration could be used to register in memory
 	 * authentication that exposes an in memory {@link UserDetailsService}:
 	 * </p>
-	 *
+	 *	举个例子,这下面的配置将能够被用来注册一个内存型的认证(通过暴露一个内存型的UserDetailsService) ...
 	 * <pre>
 	 * &#064;Override
 	 * protected void configure(AuthenticationManagerBuilder auth) {
@@ -200,24 +249,42 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected final HttpSecurity getHttp() throws Exception {
+		// 保护判断
 		if (this.http != null) {
 			return this.http;
 		}
+		// 开始调用这个方法 ..获取应用事件派发器 ..
 		AuthenticationEventPublisher eventPublisher = getAuthenticationEventPublisher();
+		// 加入到本地认证构建器中 ..
 		this.localConfigureAuthenticationBldr.authenticationEventPublisher(eventPublisher);
+		// 获取认证管理器(如果它这个 WebSecurityConfigurerAdapter 是由用户覆盖配置 的,那么它如果覆盖了configure(则表示用户有自己的 AuthenticationManager 构建) .. 这里面将会调用build
 		AuthenticationManager authenticationManager = authenticationManager();
+
+		// 拿到之后,则将这个构建出来的manager 作为 当前这个类的认证管理器构建器的父实例 ..
+		// 也就是会代理后面的行为 .(认证行为)
 		this.authenticationBuilder.parentAuthenticationManager(authenticationManager);
+		// 然后尝试获取 共享对象
 		Map<Class<?>, Object> sharedObjects = createSharedObjects();
+
+		// 然后开始创建 HttpSecurity
 		this.http = new HttpSecurity(this.objectPostProcessor, this.authenticationBuilder, sharedObjects);
+
+		// 如果默认禁用
 		if (!this.disableDefaults) {
+			// 也就是默认配置 ...
 			applyDefaultConfiguration(this.http);
+
+			// 并且我们还使用的上下文的类加载器
 			ClassLoader classLoader = this.context.getClassLoader();
+			// 然后从Spring SPI 中获取 AbstractHttpConfigurer ...
+			// 一般来说,应该是没有的
 			List<AbstractHttpConfigurer> defaultHttpConfigurers = SpringFactoriesLoader
 					.loadFactories(AbstractHttpConfigurer.class, classLoader);
 			for (AbstractHttpConfigurer configurer : defaultHttpConfigurers) {
 				this.http.apply(configurer);
 			}
 		}
+		// 然后开始调用 configure(this.http) ....
 		configure(this.http);
 		return this.http;
 	}
@@ -260,18 +327,29 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * {@link #configure(AuthenticationManagerBuilder)} method is overridden to use the
 	 * {@link AuthenticationManagerBuilder} that was passed in. Otherwise, autowire the
 	 * {@link AuthenticationManager} by type.
+	 *
+	 *
+	 * 这里它提供了一个方法(可以获取 AuthenticationManager 使用),默认的策略是(如果 configure(....builder)方法被覆盖使用 传递的 AuthenticationManagerBuilder) ..
+	 * 否则通过类型自动注入 ...
 	 * @return the {@link AuthenticationManager} to use
 	 * @throws Exception
 	 */
 	protected AuthenticationManager authenticationManager() throws Exception {
+		// 如果没有初始化 ...
 		if (!this.authenticationManagerInitialized) {
+			// 尝试配置
 			configure(this.localConfigureAuthenticationBldr);
+
+			// 表示没有覆盖,那么 我们就从 authenticationConfiguration(它是全局authenticationManager配置)
 			if (this.disableLocalConfigureAuthenticationBldr) {
+				// 然后从这里去获取 ..
 				this.authenticationManager = this.authenticationConfiguration.getAuthenticationManager();
 			}
 			else {
+				// 否则就是本地Builder 进行构建了 ... (也就是使用用户基于 这个类的实现覆盖) ...
 				this.authenticationManager = this.localConfigureAuthenticationBldr.build();
 			}
+			// 然后同样设置 初始化完毕 ..
 			this.authenticationManagerInitialized = true;
 		}
 		return this.authenticationManager;
@@ -298,6 +376,7 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * @see #userDetailsService()
 	 */
 	public UserDetailsService userDetailsServiceBean() throws Exception {
+		// 它的默认形式,还是从上下文获取
 		AuthenticationManagerBuilder globalAuthBuilder = this.context.getBean(AuthenticationManagerBuilder.class);
 		return new UserDetailsServiceDelegator(Arrays.asList(this.localConfigureAuthenticationBldr, globalAuthBuilder));
 	}
@@ -307,6 +386,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	 * {@link #userDetailsServiceBean()} without interacting with the
 	 * {@link ApplicationContext}. Developers should override this method when changing
 	 * the instance of {@link #userDetailsServiceBean()}.
+	 *
+	 *
+	 * 本质上这两个方法都是同样的代码逻辑(它也说了,如果覆盖了userDetailsServiceBean,也需要覆盖这个方法) ...
 	 * @return the {@link UserDetailsService} to use
 	 */
 	protected UserDetailsService userDetailsService() {
@@ -314,11 +396,21 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 		return new UserDetailsServiceDelegator(Arrays.asList(this.localConfigureAuthenticationBldr, globalAuthBuilder));
 	}
 
+	/**
+	 * 此configurer的核心入口方法 .. (生命周期之一)
+	 * @param web
+	 * @throws Exception
+	 */
 	@Override
 	public void init(WebSecurity web) throws Exception {
+		// 首先它先创建  HttpSecurity
 		HttpSecurity http = getHttp();
+
+		// 拿出来之后,增加
 		web.addSecurityFilterChainBuilder(http).postBuildAction(() -> {
+			// 完毕之后 ...
 			FilterSecurityInterceptor securityInterceptor = http.getSharedObject(FilterSecurityInterceptor.class);
+			// 加这个 FilterSecurityInterceptor 加入到 webSecurity
 			web.securityInterceptor(securityInterceptor);
 		});
 	}
@@ -369,13 +461,23 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 		return this.context;
 	}
 
+
+	/**
+	 * 例如在它设置应用上下文的时候 ,就从上下文获取了 ObjectPostProcessor ...
+	 * @param context
+	 */
 	@Autowired
 	public void setApplicationContext(ApplicationContext context) {
 		this.context = context;
+		// 这里直接拿的原因是(它本身如果被ObjectPostProcessor 执行生命周期过程,Aware是比 自动装配快的) ..
 		ObjectPostProcessor<Object> objectPostProcessor = context.getBean(ObjectPostProcessor.class);
+		// 然后自己new了一个LazyPasswordEncoder
+		// 其实这个密码编码器和 AuthenticationConfiguration中的相差无己,不知道它为什么要这样做,可能避免对AuthenticationConfiguration的强依赖把 ...
 		LazyPasswordEncoder passwordEncoder = new LazyPasswordEncoder(context);
+		// 然后它自己new出了一个 ..  DefaultPasswordEncoderAuthenticationManagerBuilder
 		this.authenticationBuilder = new DefaultPasswordEncoderAuthenticationManagerBuilder(objectPostProcessor,
 				passwordEncoder);
+		// 同样 本地的配置 也new 了一个 ...
 		this.localConfigureAuthenticationBldr = new DefaultPasswordEncoderAuthenticationManagerBuilder(
 				objectPostProcessor, passwordEncoder) {
 
@@ -405,6 +507,10 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 		this.contentNegotiationStrategy = contentNegotiationStrategy;
 	}
 
+	/**
+	 * 同样依赖了它 ..
+	 * @param objectPostProcessor ...
+	 */
 	@Autowired
 	public void setObjectPostProcessor(ObjectPostProcessor<Object> objectPostProcessor) {
 		this.objectPostProcessor = objectPostProcessor;
@@ -416,22 +522,31 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	}
 
 	private AuthenticationEventPublisher getAuthenticationEventPublisher() {
+		// 同样它从应用上下文中获取一个认证事件派发器 ...
 		if (this.context.getBeanNamesForType(AuthenticationEventPublisher.class).length > 0) {
 			return this.context.getBean(AuthenticationEventPublisher.class);
 		}
+		// 否则 自己new 一个 ...
 		return this.objectPostProcessor.postProcess(new DefaultAuthenticationEventPublisher());
 	}
 
 	/**
+	 * 我们来看一下,它的共享对象的初始化 形式
 	 * Creates the shared objects
 	 * @return the shared Objects
 	 */
 	private Map<Class<?>, Object> createSharedObjects() {
 		Map<Class<?>, Object> sharedObjects = new HashMap<>();
+		// 本地配置认证builder的所有共享对象全部加入
 		sharedObjects.putAll(this.localConfigureAuthenticationBldr.getSharedObjects());
+		// userService ...
+		// 当然这里的userDetailsService(如果没有覆盖,它是一个代理器,等到最后authenticationManager 构建完毕之后在获取)
 		sharedObjects.put(UserDetailsService.class, userDetailsService());
+		// 应用上下文 ...
 		sharedObjects.put(ApplicationContext.class, this.context);
+		// 内容协商策略
 		sharedObjects.put(ContentNegotiationStrategy.class, this.contentNegotiationStrategy);
+		// 认证 token 解析器
 		sharedObjects.put(AuthenticationTrustResolver.class, this.trustResolver);
 		return sharedObjects;
 	}

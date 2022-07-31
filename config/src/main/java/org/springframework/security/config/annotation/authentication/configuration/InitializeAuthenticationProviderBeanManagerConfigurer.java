@@ -25,6 +25,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
  * Lazily initializes the global authentication with an {@link AuthenticationProvider} if
  * it is not yet configured and there is only a single Bean of that type.
  *
+ * 使用AuthenticationProvider 懒惰的初始化全局认证(它没有配置并且仅仅只有单个类型的Bean) ...
+ *
  * @author Rob Winch
  * @since 4.1
  */
@@ -55,6 +57,8 @@ class InitializeAuthenticationProviderBeanManagerConfigurer extends GlobalAuthen
 				return;
 			}
 			AuthenticationProvider authenticationProvider = getBeanOrNull(AuthenticationProvider.class);
+
+			// 如果认证Provider 不为空,则增加 ...
 			if (authenticationProvider == null) {
 				return;
 			}

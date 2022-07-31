@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * A base {@link SecurityBuilder} that ensures the object being built is only built one
  * time.
  *
+ * SecurityBuilder的抽象基类(确保对象仅仅被构建一次) ...
+ *
  * @param <O> the type of Object that is being built
  * @author Rob Winch
  *
@@ -53,7 +55,10 @@ public abstract class AbstractSecurityBuilder<O> implements SecurityBuilder<O> {
 		return this.object;
 	}
 
+
+
 	/**
+	 * 然后它为子类开辟了一个 doBuild的真正构建方法,也就是所有子类就实现这个方法 ... 然后 以前看的时候没看懂 ...
 	 * Subclasses should implement this to perform the build.
 	 * @return the object that should be returned by {@link #build()}.
 	 * @throws Exception if an error occurs

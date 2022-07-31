@@ -33,7 +33,8 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * A {@link RequestMatcher} that uses Spring MVC's {@link HandlerMappingIntrospector} to
  * match the path and extract variables.
- *
+ * 通过 Spring mvc的 HandlerMappingIntrospector 匹配路径并抓取变量的 RequestMatcher
+ * 重要的是理解 spring mvc的匹配是相对于 servlet的,这意味着如果你映射到任何一个servlet(以 / 开头),你应该指定 在不同的映射上 servletPath(string)属性
  * <p>
  * It is important to understand that Spring MVC's matching is relative to the servlet
  * path. This means if you have mapped any servlet to a path that starts with "/" and is
@@ -56,6 +57,9 @@ public class MvcRequestMatcher implements RequestMatcher, RequestVariablesExtrac
 
 	private HttpMethod method;
 
+	/**
+	 * 针对于那个 servlet .. path
+	 */
 	private String servletPath;
 
 	public MvcRequestMatcher(HandlerMappingIntrospector introspector, String pattern) {

@@ -97,10 +97,20 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 /**
+ *
+ * HttpSecurity 类似于 spring security的在命名空间配置中的xml http 元素
+ * 它允许针对给定的请求配置基于web的安全 .. 默认它将应用到所有的请求上,但是能够使用requestMatcher(RequestMatcher)进行限制或者其他类似的方法进行限制 ...
+ *
  * A {@link HttpSecurity} is similar to Spring Security's XML &lt;http&gt; element in the
  * namespace configuration. It allows configuring web based security for specific http
  * requests. By default it will be applied to all requests, but can be restricted using
  * {@link #requestMatcher(RequestMatcher)} or other similar methods.
+ *
+ *
+ * 简单使用:
+ * 	最基本形式的配置如下所示:
+ * 		这个配置将需要 对于请求任何URL 的用户必须拥有ROLE_USER ...角色 ..
+ * 	它也定义了一个内存认证方案(用户有一个用户名为 user / 密码 password 并且角色为 ROLE_USER)
  *
  * <h2>Example Usage</h2>
  *
@@ -131,6 +141,9 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
  * @author Joe Grandja
  * @since 3.2
  * @see EnableWebSecurity
+ *
+ * 实现了 AbstractConfiguredSecurityBuilder 就可以 让所有的 SecurityConfigurer  配置这个Builder ...
+ * 它的目的就是构建 DefaultSecurityFilterChain,构建者是 HttpSecurity
  */
 public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<DefaultSecurityFilterChain, HttpSecurity>
 		implements SecurityBuilder<DefaultSecurityFilterChain>, HttpSecurityBuilder<HttpSecurity> {
@@ -158,11 +171,16 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 			AuthenticationManagerBuilder authenticationBuilder, Map<Class<?>, Object> sharedObjects) {
 		super(objectPostProcessor);
 		Assert.notNull(authenticationBuilder, "authenticationBuilder cannot be null");
+
+		// 表示这个构建器的多个configurer 都可以共享的对象 ...
 		setSharedObject(AuthenticationManagerBuilder.class, authenticationBuilder);
 		for (Map.Entry<Class<?>, Object> entry : sharedObjects.entrySet()) {
 			setSharedObject((Class<Object>) entry.getKey(), entry.getValue());
 		}
+		// 直接从共享对象中拿取应用上下文 ...
 		ApplicationContext context = (ApplicationContext) sharedObjects.get(ApplicationContext.class);
+
+		// 请求匹配配置器 ...
 		this.requestMatcherConfigurer = new RequestMatcherConfigurer(context);
 	}
 
@@ -3100,6 +3118,10 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Defaul
 
 	/**
 	 * Allows mapping HTTP requests that this {@link HttpSecurity} will be used for
+	 *
+	 * 允许映射被这个HttpSecurity使用的 http 请求 ..
+	 *
+	 * AbstractRequestMatcherRegistry 提供了一些方法注册 需要认证的 requestMatcher .. 并且为了链式调用 ...  所以大多数接口都是( ? extends ..xxx<?>)的形式 ...
 	 *
 	 * @author Rob Winch
 	 * @since 3.2

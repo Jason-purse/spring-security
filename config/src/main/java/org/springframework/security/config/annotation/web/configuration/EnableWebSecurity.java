@@ -32,6 +32,9 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
  * configuration defined in any {@link WebSecurityConfigurer} or more likely by extending
  * the {@link WebSecurityConfigurerAdapter} base class and overriding individual methods:
  *
+ * 增加这个注解到任何一个@Configuration(具有Spring security 配置的 WebSecurityConfigurer类)上,或者通过继承上述类进行基类扩展并覆盖独立的方法 ...
+ *
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebSecurity
@@ -69,6 +72,9 @@ import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
  * @see WebSecurityConfigurer
  * @see WebSecurityConfigurerAdapter
  *
+ *
+ * 这个 注解导入了 几个配置 ...
+ * 以及另外几个注解 ...
  * @author Rob Winch
  * @since 3.2
  */

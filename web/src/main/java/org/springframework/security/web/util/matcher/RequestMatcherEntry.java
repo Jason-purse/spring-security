@@ -19,6 +19,7 @@ package org.springframework.security.web.util.matcher;
 /**
  * A rich object for associating a {@link RequestMatcher} to another object.
  *
+ * 关联到 RequestMatcher 到另一个对象的 rich 对象 ...
  * @author Marcus Da Coregio
  * @since 5.5.5
  */

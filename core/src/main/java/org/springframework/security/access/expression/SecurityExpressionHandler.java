@@ -25,6 +25,8 @@ import org.springframework.security.core.Authentication;
  * Facade which isolates Spring Security's requirements for evaluating security
  * expressions from the implementation of the underlying expression objects
  *
+ * 这是一个 spring security对 评估表达式的需求 / 底层表达式对象的实现 隔离 的对立面
+ *
  * @author Luke Taylor
  * @since 3.1
  */

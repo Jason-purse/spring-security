@@ -55,6 +55,11 @@ import org.springframework.util.Assert;
 /**
  * Exports the authentication {@link Configuration}
  *
+ * 这个配置是在@EnableWebSecurity或者 @EnableGlobalMethodSecurity的时候导入的 ..
+ *
+ * 它们都会导入 AuthenticationConfiguration ,
+ * 这个类暴露了认证配置 ...
+ *
  * @author Rob Winch
  * @since 3.2
  *
@@ -71,16 +76,24 @@ public class AuthenticationConfiguration {
 
 	private boolean authenticationManagerInitialized;
 
+	/**
+	 * 全局的认证配置适配器 ..
+	 */
 	private List<GlobalAuthenticationConfigurerAdapter> globalAuthConfigurers = Collections.emptyList();
 
 	private ObjectPostProcessor<Object> objectPostProcessor;
 
+//	暴露一个认证管理器构建器
 	@Bean
 	public AuthenticationManagerBuilder authenticationManagerBuilder(ObjectPostProcessor<Object> objectPostProcessor,
 			ApplicationContext context) {
+		// 懒加载密码编码器是为了 多种密码存储 ...
 		LazyPasswordEncoder defaultPasswordEncoder = new LazyPasswordEncoder(context);
+		// 认证事件派发器,是提前处理好的 ...(其他的自动配置进行加载)
 		AuthenticationEventPublisher authenticationEventPublisher = getBeanOrNull(context,
 				AuthenticationEventPublisher.class);
+		// 默认的密码编码器认证管理器构建器 ....
+		// 也可以看出来 认证管理基于 PasswordEncoder 进行用户校验 ...
 		DefaultPasswordEncoderAuthenticationManagerBuilder result = new DefaultPasswordEncoderAuthenticationManagerBuilder(
 				objectPostProcessor, defaultPasswordEncoder);
 		if (authenticationEventPublisher != null) {
@@ -89,39 +102,63 @@ public class AuthenticationConfiguration {
 		return result;
 	}
 
+	// 全局认证配置器适配器 ...
+	// 以下三个都是 -----------------------------------
+	// 同样的交给 认证管理器 ...
 	@Bean
 	public static GlobalAuthenticationConfigurerAdapter enableGlobalAuthenticationAutowiredConfigurer(
 			ApplicationContext context) {
 		return new EnableGlobalAuthenticationAutowiredConfigurer(context);
 	}
 
+	// userDetailsService 获取来源
 	@Bean
 	public static InitializeUserDetailsBeanManagerConfigurer initializeUserDetailsBeanManagerConfigurer(
 			ApplicationContext context) {
 		return new InitializeUserDetailsBeanManagerConfigurer(context);
 	}
 
+	// authenticationProvider bean 获取来源 ..
 	@Bean
 	public static InitializeAuthenticationProviderBeanManagerConfigurer initializeAuthenticationProviderBeanManagerConfigurer(
 			ApplicationContext context) {
 		return new InitializeAuthenticationProviderBeanManagerConfigurer(context);
 	}
 
+	/**
+	 * 这是构建AuthenticationManager的核心 ..
+	 * 有一定的逻辑在里面,直接看有点看不懂 ...
+	 * @return
+	 * @throws Exception
+	 */
 	public AuthenticationManager getAuthenticationManager() throws Exception {
 		if (this.authenticationManagerInitialized) {
 			return this.authenticationManager;
 		}
 		AuthenticationManagerBuilder authBuilder = this.applicationContext.getBean(AuthenticationManagerBuilder.class);
+		// 如果这里有了Bean,如果我们直接返回AuthenticationManagerBuilder.build 会怎么样,将导致无限递归 ..
+		// 为什么呢?? 先留下这个疑问 ..
+		// 已经调用过一次了,
+		// 第一次 给一个壳子 ...
 		if (this.buildingAuthenticationManager.getAndSet(true)) {
 			return new AuthenticationManagerDelegator(authBuilder);
 		}
+		// 全局认证配置适配器 ..
+		// 也就是用户配置之后的补丁 ...
+		// 保证程序能够正确的配置 。。。
 		for (GlobalAuthenticationConfigurerAdapter config : this.globalAuthConfigurers) {
 			authBuilder.apply(config);
 		}
+
+		// 然后尝试构建 ...
+		// 将所有的 configurer 进行配置 .. 形成完成的authenticationManager ...
 		this.authenticationManager = authBuilder.build();
+		// 如果说返回的是(全局构建器Manager = null)
 		if (this.authenticationManager == null) {
+			// 懒加载一个 ....
 			this.authenticationManager = getAuthenticationManagerBean();
 		}
+		// 设置为 true了 ..
 		this.authenticationManagerInitialized = true;
 		return this.authenticationManager;
 	}
@@ -210,6 +247,7 @@ public class AuthenticationConfiguration {
 
 		@Override
 		public void init(AuthenticationManagerBuilder auth) {
+			// 被这个注解注释的beans
 			Map<String, Object> beansWithAnnotation = this.context
 					.getBeansWithAnnotation(EnableGlobalAuthentication.class);
 			if (logger.isTraceEnabled()) {

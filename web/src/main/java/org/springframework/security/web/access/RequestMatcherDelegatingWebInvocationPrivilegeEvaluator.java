@@ -33,6 +33,8 @@ import org.springframework.web.context.ServletContextAware;
  * {@link WebInvocationPrivilegeEvaluator} based on a
  * {@link org.springframework.security.web.util.matcher.RequestMatcher} evaluation
  *
+ * 基于 RequestMatcher 评估 代理到一个执行权限评估器列表 ...
+ *
  * @author Marcus Da Coregio
  * @since 5.5.5
  */

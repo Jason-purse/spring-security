@@ -36,6 +36,8 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
  * to have JDBC authentication. It also allows easily adding users to the database used
  * for authentication and setting up the schema.
  *
+ *
+ * 为AuthenticationManagerBuilder 配置 进行JDBC 认证,它也允许更容易的增加用户到 数据库(根据认证)以及配置配置schema ..
  * <p>
  * The only required method is the {@link #dataSource(javax.sql.DataSource)} all other
  * methods have reasonable defaults.
@@ -168,11 +170,13 @@ public class JdbcUserDetailsManagerConfigurer<B extends ProviderManagerBuilder<B
 	 * customizations
 	 */
 	public JdbcUserDetailsManagerConfigurer<B> withDefaultSchema() {
+		// 我们也可以根据这个创建最基本的 用户信息 ... 但是没必要 ..
 		this.initScripts.add(new ClassPathResource("org/springframework/security/core/userdetails/jdbc/users.ddl"));
 		return this;
 	}
 
 	protected DatabasePopulator getDatabasePopulator() {
+		// 可以看到它可以收集 外部resource的数据库脚本,并执行 ...
 		ResourceDatabasePopulator dbp = new ResourceDatabasePopulator();
 		dbp.setScripts(this.initScripts.toArray(new Resource[0]));
 		return dbp;

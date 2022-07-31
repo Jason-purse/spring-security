@@ -40,6 +40,13 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 /**
+ *
+ * 最后,当bean 注入到容器之后,尝试在接收 servlet事件的时候,注入 DelegatingFilterProxy ...
+ *
+ * 注册 DelegatingFilterProxy 使用 springSecurityFilterChain(在任何其他已注入的Filter之前) ...
+ * 当被  #AbstractSecurityWebApplicationInitializer(Class...) 使用的时候,它也会注入一个ContextLoaderListener ...
+ * 当被 #AbstractSecurityWebApplicationInitializer() 使用的时候,这个类通常被使用在 一个 AbstractContextLoaderInitializer的子类中 ...
+ *
  * Registers the {@link DelegatingFilterProxy} to use the springSecurityFilterChain before
  * any other registered {@link Filter}. When used with
  * {@link #AbstractSecurityWebApplicationInitializer(Class...)}, it will also register a
@@ -47,18 +54,23 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  * {@link #AbstractSecurityWebApplicationInitializer()}, this class is typically used in
  * addition to a subclass of {@link AbstractContextLoaderInitializer}.
  *
+ * 默认 ??? 这句话什么意思 ...
  * <p>
  * By default the {@link DelegatingFilterProxy} is registered without support, but can be
  * enabled by overriding {@link #isAsyncSecuritySupported()} and
  * {@link #getSecurityDispatcherTypes()}.
  * </p>
  *
+ * // spring securityFilterChain 增加之后 以及 额外的配置之前你可以通过 afterSpringSecurityFilterChain(ServletContext)进行覆盖 补充 ..
  * <p>
  * Additional configuration before and after the springSecurityFilterChain can be added by
  * overriding {@link #afterSpringSecurityFilterChain(ServletContext)}.
  * </p>
  *
  *
+ *  警告:
+ *  AbstractDispatcherServletInitializer 的子类 将会注册它们的过滤器在其他任何过滤器之前 ... 这意味着你通常想要确保AbstractDispatcherServletInitializer的子类优先执行 ...
+ *  这也能够通过通过使用Order注解或者 Ordered 接口 完成(只要它们的优先级比 AbstractSecurityWebApplicationInitializer子类快)
  * <h2>Caveats</h2>
  * <p>
  * Subclasses of AbstractDispatcherServletInitializer will register their filters before
@@ -132,6 +144,8 @@ public abstract class AbstractSecurityWebApplicationInitializer implements WebAp
 	 */
 	private void insertSpringSecurityFilterChain(ServletContext servletContext) {
 		String filterName = DEFAULT_FILTER_NAME;
+
+		// 在这里new  出来 ...
 		DelegatingFilterProxy springSecurityFilterChain = new DelegatingFilterProxy(filterName);
 		String contextAttribute = getWebApplicationContextAttribute();
 		if (contextAttribute != null) {

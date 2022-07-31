@@ -279,7 +279,9 @@ public final class LogoutConfigurer<H extends HttpSecurityBuilder<H>>
 		}
 		DefaultLoginPageGeneratingFilter loginPageGeneratingFilter = http
 				.getSharedObject(DefaultLoginPageGeneratingFilter.class);
+		// 获取登录页面生成过滤器 ...
 		if (loginPageGeneratingFilter != null && !isCustomLogoutSuccess()) {
+			// 那么就使用登出成功url ....
 			loginPageGeneratingFilter.setLogoutSuccessUrl(getLogoutSuccessUrl());
 		}
 	}
@@ -334,6 +336,11 @@ public final class LogoutConfigurer<H extends HttpSecurityBuilder<H>>
 		return result;
 	}
 
+	/**
+	 * 4中方式请求 都是退出 ...登录
+	 * @param http
+	 * @return
+	 */
 	private RequestMatcher getLogoutRequestMatcher(H http) {
 		if (this.logoutRequestMatcher != null) {
 			return this.logoutRequestMatcher;
@@ -345,9 +352,12 @@ public final class LogoutConfigurer<H extends HttpSecurityBuilder<H>>
 	@SuppressWarnings("unchecked")
 	private RequestMatcher createLogoutRequestMatcher(H http) {
 		RequestMatcher post = createLogoutRequestMatcher("POST");
+		// 仅当 csrf 不为空的时候,才设置为这样 ... ,所以我们禁用csrf保护的时候, /login 直接就退出了 ....
 		if (http.getConfigurer(CsrfConfigurer.class) != null) {
 			return post;
 		}
+
+		// 原因就是  四种都可以解决了 .... 所以如果我们需要它显示 .. 加上请求匹配器
 		RequestMatcher get = createLogoutRequestMatcher("GET");
 		RequestMatcher put = createLogoutRequestMatcher("PUT");
 		RequestMatcher delete = createLogoutRequestMatcher("DELETE");

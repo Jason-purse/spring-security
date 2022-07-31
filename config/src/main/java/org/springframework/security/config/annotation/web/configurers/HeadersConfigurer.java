@@ -48,6 +48,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 
 /**
+ * 增加了一堆headers 到响应中 .... Security Http headers 默认激活(当使用 WebSecurityConfigurerAdapter 默认构造的时候) ...
+ *
  * <p>
  * Adds the Security HTTP headers to the response. Security HTTP headers is activated by
  * default when using {@link WebSecurityConfigurerAdapter}'s default constructor.

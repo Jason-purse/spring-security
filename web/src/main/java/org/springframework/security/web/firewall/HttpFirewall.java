@@ -27,6 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * before sending any request through the filter chain. It can also provide a response
  * wrapper if the response behaviour should also be restricted.
  *
+ *
+ * 这是一个接口(被用来拒绝潜在不安全的请求 或者包装它们用于控制行为) ..
+ * 这个实现被注入到 FilterChainProxy(并且在通过这个filter chain发送任何请求之前执行) ... 它也提供了一个响应包装器(如果这个响应的行为应该被限制) ...
+ *
  * @author Luke Taylor
  */
 public interface HttpFirewall {

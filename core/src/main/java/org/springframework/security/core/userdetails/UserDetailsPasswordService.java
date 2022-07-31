@@ -19,6 +19,7 @@ package org.springframework.security.core.userdetails;
 /**
  * An API for changing a {@link UserDetails} password.
  *
+ * 这个API 能够更新用户密码
  * @author Rob Winch
  * @since 5.1
  */

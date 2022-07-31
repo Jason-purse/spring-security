@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adds password management support.
+ * 增加密码管理支持 ..
  *
  * @author Evgeniy Cheban
  * @since 5.6

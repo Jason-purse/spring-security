@@ -30,6 +30,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
  * class is not intended to be imported manually rather it is imported automatically when
  * using {@link EnableWebSecurity} or {@link EnableGlobalMethodSecurity}.
  *
+ * Spring 配置将会暴露一个默认的ObjectPostProcessor,这个类并没有打算手动import(相反它是自动导入的,当使用@EnableWebSecurity或者@EnableGlobalMethodSecurity)
+ *
  * @author Rob Winch
  * @since 3.2
  * @see EnableWebSecurity

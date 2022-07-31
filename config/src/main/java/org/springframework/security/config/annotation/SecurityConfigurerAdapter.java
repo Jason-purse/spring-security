@@ -29,6 +29,10 @@ import org.springframework.util.Assert;
  * {@link SecurityConfigurer} and when done gaining access to the {@link SecurityBuilder}
  * that is being configured.
  *
+ *
+ * SecurityConfigurerAdapter 本质上和  SecurityConfigurer 差别不大,仅仅是做了适配 ...
+ * 允许子类实现感兴趣的方法,它提供了一种机制去使用SecurityConfigurer,并且可以完全细腻的访问SecurityBuilder(当SecurityConfigurerAdapter 已经配置完毕之后) ..
+ *
  * @param <O> The Object being built by B
  * @param <B> The Builder that is building O and is configured by
  * {@link SecurityConfigurerAdapter}
@@ -36,9 +40,13 @@ import org.springframework.util.Assert;
  * @author Wallace Wadge
  */
 public abstract class SecurityConfigurerAdapter<O, B extends SecurityBuilder<O>> implements SecurityConfigurer<O, B> {
+	// 同样的B是一个SecurityBuilder ,它需要构建出O ...
 
 	private B securityBuilder;
 
+	/**
+	 * 一个复合的ObjectPostProcessor ..
+	 */
 	private CompositeObjectPostProcessor objectPostProcessor = new CompositeObjectPostProcessor();
 
 	@Override

@@ -43,6 +43,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * Holds objects associated with a HTTP filter.
+ * 与一个http 过滤器关联的持有的对象 ...
+ * 保证请求和响应是 httpServletRequest 和 HttpServletResponse 的实例 ..
+ * 并且这里不会存在空对象 ...
+ *
+ * 确保 security system classes 能够去访问 这个过滤器的环境,以及请求和响应 ...
  * <P>
  * Guarantees the request and response are instances of <code>HttpServletRequest</code>
  * and <code>HttpServletResponse</code>, and that there are no <code>null</code> objects.

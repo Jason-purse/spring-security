@@ -161,14 +161,19 @@ public abstract class AbstractRequestMatcherRegistry<C> {
 	 */
 	protected final List<MvcRequestMatcher> createMvcMatchers(HttpMethod method, String... mvcPatterns) {
 		Assert.state(!this.anyRequestConfigured, "Can't configure mvcMatchers after anyRequest");
+		// 拿取ObjectPostProcessor ...
 		ObjectPostProcessor<Object> opp = this.context.getBean(ObjectPostProcessor.class);
+
 		if (!this.context.containsBean(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME)) {
 			throw new NoSuchBeanDefinitionException("A Bean named " + HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME
 					+ " of type " + HandlerMappingIntrospector.class.getName()
 					+ " is required to use MvcRequestMatcher. Please ensure Spring Security & Spring MVC are configured in a shared ApplicationContext.");
 		}
+		// 拿取这个 bean
+		// web 环境 ...
 		HandlerMappingIntrospector introspector = this.context.getBean(HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME,
 				HandlerMappingIntrospector.class);
+
 		List<MvcRequestMatcher> matchers = new ArrayList<>(mvcPatterns.length);
 		for (String mvcPattern : mvcPatterns) {
 			MvcRequestMatcher matcher = new MvcRequestMatcher(introspector, mvcPattern);

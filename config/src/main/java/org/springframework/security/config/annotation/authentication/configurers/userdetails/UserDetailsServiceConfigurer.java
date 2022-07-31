@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * Allows configuring a {@link UserDetailsService} within a
  * {@link AuthenticationManagerBuilder}.
  *
+ * 允许配置 UserDetailsService在AuthenticationManagerBuilder中 ...
  * @param <B> the type of the {@link ProviderManagerBuilder}
  * @param <C> the {@link UserDetailsServiceConfigurer} (or this)
  * @param <U> the type of UserDetailsService being used to allow for returning the
@@ -51,6 +52,8 @@ public class UserDetailsServiceConfigurer<B extends ProviderManagerBuilder<B>, C
 	/**
 	 * Allows subclasses to initialize the {@link UserDetailsService}. For example, it
 	 * might add users, initialize schema, etc.
+	 *
+	 * 允许子类初始化UserDetailsService,例如增加用户 / schema ,于是基于内存型的UserDetailsManager 继承了这个类
 	 */
 	protected void initUserDetailsService() throws Exception {
 	}

@@ -27,6 +27,8 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
  * Adds a convenient base class for {@link SecurityConfigurer} instances that operate on
  * {@link HttpSecurity}.
  *
+ * 这是一个方便的基类(能够让  SecurityConfigurer 实例方便的操作HttpSecurity) ...
+ *
  * @author Rob Winch
  */
 public abstract class AbstractHttpConfigurer<T extends AbstractHttpConfigurer<T, B>, B extends HttpSecurityBuilder<B>>

@@ -35,6 +35,9 @@ import org.springframework.util.Assert;
  * post processing of {@link Aware} methods, {@link InitializingBean#afterPropertiesSet()}
  * , and {@link DisposableBean#destroy()}.
  *
+ * 允许注册的对象去参与AutowireCapableBeanFactory的Aware方法的后置处理,以及 InitializingBean#afterPropertiesSet() 以及 DisposableBean#destroy()
+ * 也就是将它注册为一个bean了 ...(但是本质上 spring 容器并不管理这些bean),所以你能够看到下面将他们收集起来了 ...
+ *
  * @author Rob Winch
  * @since 3.2
  */

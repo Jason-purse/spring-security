@@ -39,14 +39,22 @@ import org.springframework.web.filter.DelegatingFilterProxy;
  * specific goals than that of the {@link SecurityBuilder}.
  * </p>
  *
+ * 基类SecurityBuilder 允许 SecurityConfigurer 应用它 ...
+ * 这使得修改这个SecurityBuilder 的一个策略能够被定制(将SecurityBuilder 分解为多个 SecurityConfigurer, 那么这样 SecurityConfigurer 具有比SecurityConfigurer 更加特定于某一方面,以及 可以包含更多特定的 SecurityBuilder)
+ *
  * <p>
  * For example, a {@link SecurityBuilder} may build an {@link DelegatingFilterProxy}, but
  * a {@link SecurityConfigurer} might populate the {@link SecurityBuilder} with the
  * filters necessary for session management, form based login, authorization, etc.
  * </p>
  *
- * @param <O> The object that this builder returns
- * @param <B> The type of this builder (that is returned by the base class)
+ * 举个例子,SecurityBuilder 也许会构建一个 DelegatingFilterProxy,但是 SecurityConfigurer也许可以收集 SecurityBuilder(进行会话管理的过滤器),基于表单登录,授权等等 ..
+ * 那么这些细节都可以通过一个方面的 SecurityConfigurer 进行约束,它包含了更多的 SecurityBuilder ...
+ *
+ *
+ * 这个类 有点像是 SecurityBuilder的代理类,然后实现依据就是根据 SecurityConfigurer 驱动 SecurityBuilder的代理类做事情 ...
+ * @param <O> The object that this builder returns 表示需要构建返回的对象
+ * @param <B> The type of this builder (that is returned by the base class) 但是 B可以是 能够修订这个对象的特定构建器 ...
  * @author Rob Winch
  * @see WebSecurity
  */
@@ -55,12 +63,23 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 
 	private final Log logger = LogFactory.getLog(getClass());
 
+
+	// 记录  一个 SecurityConfigurer<O,B>类 下面可以有多个 SecurityConfigurer<O,B>
 	private final LinkedHashMap<Class<? extends SecurityConfigurer<O, B>>, List<SecurityConfigurer<O, B>>> configurers = new LinkedHashMap<>();
 
+	/**
+	 * 在初始化期间加入的 SecurityConfigurer<O,B>
+	 */
 	private final List<SecurityConfigurer<O, B>> configurersAddedInInitializing = new ArrayList<>();
 
+	/**
+	 * 共享对象 ...
+	 */
 	private final Map<Class<?>, Object> sharedObjects = new HashMap<>();
 
+	/**
+	 * 是否允许相同类型的配置器 ...
+	 */
 	private final boolean allowConfigurersOfSameType;
 
 	private BuildState buildState = BuildState.UNBUILT;
@@ -97,6 +116,8 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	 * determine if {@link #build()} needs to be called first.
 	 * @return the result of {@link #build()} or {@link #getObject()}. If an error occurs
 	 * while building, returns null.
+	 *
+	 * 类似于 build() 和 getObject(),但是先检查状态决定是否构建  .. 结果就是 build() / getObject() ...
 	 */
 	public O getOrBuild() {
 		if (!isUnbuilt()) {
@@ -112,8 +133,14 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	}
 
 	/**
+	 *
 	 * Applies a {@link SecurityConfigurerAdapter} to this {@link SecurityBuilder} and
 	 * invokes {@link SecurityConfigurerAdapter#setBuilder(SecurityBuilder)}.
+	 *
+	 * 应用SecurityConfigurerAdapter 到当前的SecurityBuilder,然后执行 SecurityConfigurerAdapter设置 SecurityBuilder ...
+	 *
+	 * 采用了访问者模式 ....
+	 * 解耦复合逻辑 ...
 	 * @param configurer
 	 * @return the {@link SecurityConfigurerAdapter} for further customizations
 	 * @throws Exception
@@ -121,7 +148,9 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	@SuppressWarnings("unchecked")
 	public <C extends SecurityConfigurerAdapter<O, B>> C apply(C configurer) throws Exception {
 		configurer.addObjectPostProcessor(this.objectPostProcessor);
+		// 设置这个配置器 是构建自己的 ..,便于通过and 调回来链式调用 ...
 		configurer.setBuilder((B) this);
+		// 将它记录起来 ...
 		add(configurer);
 		return configurer;
 	}
@@ -130,6 +159,9 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	 * Applies a {@link SecurityConfigurer} to this {@link SecurityBuilder} overriding any
 	 * {@link SecurityConfigurer} of the exact same class. Note that object hierarchies
 	 * are not considered.
+	 *
+	 * 应用一个 SecurityConfigurer 到这个SecurityBuilder 覆盖任何一个完全相同类的SecurityConfigurer ...
+	 * 注意到 对象层级不考虑(也就是不考虑类的结构,仅仅根据class 进行判断) ..
 	 * @param configurer
 	 * @return the {@link SecurityConfigurerAdapter} for further customizations
 	 * @throws Exception
@@ -141,6 +173,8 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 
 	/**
 	 * Sets an object that is shared by multiple {@link SecurityConfigurer}.
+	 *
+	 * 被多个SecurityConfigurer 共享的对象 设置 ..
 	 * @param sharedType the Class to key the shared object by.
 	 * @param object the Object to store
 	 */
@@ -178,16 +212,19 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 		Class<? extends SecurityConfigurer<O, B>> clazz = (Class<? extends SecurityConfigurer<O, B>>) configurer
 				.getClass();
 		synchronized (this.configurers) {
+			// 配置完毕了,加入没用 ..
 			if (this.buildState.isConfigured()) {
 				throw new IllegalStateException("Cannot apply " + configurer + " to already built object");
 			}
 			List<SecurityConfigurer<O, B>> configs = null;
 			if (this.allowConfigurersOfSameType) {
+				// 如果允许,加入
 				configs = this.configurers.get(clazz);
 			}
 			configs = (configs != null) ? configs : new ArrayList<>(1);
 			configs.add(configurer);
 			this.configurers.put(clazz, configs);
+			// 如果是初始化的时候加入的,也就是构建器本身还没有初始化好 ... 等待初始化完毕之后,一一执行 ...
 			if (this.buildState.isInitializing()) {
 				this.configurersAddedInInitializing.add(configurer);
 			}
@@ -281,8 +318,12 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	}
 
 	/**
+	 *
+	 *
 	 * Executes the build using the {@link SecurityConfigurer}'s that have been applied
 	 * using the following steps:
+	 *
+	 * doBuild 这个方法执行了  构建状态的变化 ...
 	 *
 	 * <ul>
 	 * <li>Invokes {@link #beforeInit()} for any subclass to hook into</li>
@@ -337,6 +378,12 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 		for (SecurityConfigurer<O, B> configurer : configurers) {
 			configurer.init((B) this);
 		}
+
+		// 我觉得就离谱 ...
+		// 你这里如果说,子类在生命周期中加入了,你上面不是已经加入了configurer吗,这重复调用 init ....
+		// 肤浅了 ....
+		// 上面的 SecurityConfigurer 在init的这个方法调用的时候已经进入了初始化阶段,那么这些configurer 也是可以增加 另外的 SecurityConfigurer,也就是将配置工作交给了另外的组件 ...
+		// 那么它们被增加的configurer 同样需要进行init ....
 		for (SecurityConfigurer<O, B> configurer : this.configurersAddedInInitializing) {
 			configurer.init((B) this);
 		}
@@ -370,6 +417,7 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 
 	/**
 	 * The build state for the application
+	 * 应用的构建状态 ...
 	 *
 	 * @author Rob Winch
 	 * @since 3.2

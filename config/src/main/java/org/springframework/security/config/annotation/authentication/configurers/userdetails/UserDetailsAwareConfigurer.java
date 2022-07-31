@@ -26,6 +26,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * Base class that allows access to the {@link UserDetailsService} for using as a default
  * value with {@link AuthenticationManagerBuilder}.
  *
+ * 允许访问 UserDetailsService的基类,将它作为 AuthenticationManagerBuilder ...的默认值 ...
+ *
  * @param <B> the type of the {@link ProviderManagerBuilder}
  * @param <U> the type of {@link UserDetailsService}
  * @author Rob Winch
@@ -33,7 +35,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public abstract class UserDetailsAwareConfigurer<B extends ProviderManagerBuilder<B>, U extends UserDetailsService>
 		extends SecurityConfigurerAdapter<AuthenticationManager, B> {
 
+
 	/**
+	 * 	没有什么复杂的,也就是增加了一个方法,为这个Configurer,可以获取UserDetailsService ...
 	 * Gets the {@link UserDetailsService} or null if it is not available
 	 * @return the {@link UserDetailsService} or null if it is not available
 	 */

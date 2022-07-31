@@ -27,6 +27,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
  * {@link AuthenticationConfiguration} to configure the global
  * {@link AuthenticationManagerBuilder}.
  *
+ * 全局认证配置适配器 ...
+ * 能够暴露为一个Bean 去配置 全局的 AuthenticationManagerBuilder, 这个类型的Beans将会自动的被 AuthenticationConfiguration使用
+ * 去配置 global AuthenticationManagerBuilder
+ *
  * @author Rob Winch
  * @since 5.0
  */
