@@ -28,6 +28,12 @@ import org.springframework.util.Assert;
  * By default the implementation will assume 80:443 and 8080:8443 are HTTP:HTTPS pairs
  * respectively. If different pairs are required, use {@link #setPortMappings(Map)}.
  *
+ * ...
+ * 很简单的实现 ...
+ * 比如 80 / 443
+ * 8080 / 8443 ...
+ * 如果有不同的,设置端口映射即可 ..
+ *
  * @author Ben Alex
  * @author colin sampaleanu
  */

@@ -23,6 +23,8 @@ import org.springframework.security.core.AuthenticationException;
  * Indicates a class can process a specific
  * {@link org.springframework.security.core.Authentication} implementation.
  *
+ * 认证提供器  进行指定类型的认证 ..
+ *
  * @author Ben Alex
  */
 public interface AuthenticationProvider {

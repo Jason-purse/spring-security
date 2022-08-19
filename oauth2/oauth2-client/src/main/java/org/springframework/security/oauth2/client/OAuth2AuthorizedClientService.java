@@ -28,6 +28,10 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
  * who is the {@link OAuth2AuthorizedClient#getPrincipalName() Principal} that originally
  * granted the authorization.
  *
+ * 这个接口的实现 负责管理已经授权的客户端(OAuth2AuthorizedClient) ...
+ * 它提供了一种目的(关联访问token 凭证到 给定的client registration 以及 资源拥有者 ...
+ * 身份表示谁授予这个授权 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see OAuth2AuthorizedClient

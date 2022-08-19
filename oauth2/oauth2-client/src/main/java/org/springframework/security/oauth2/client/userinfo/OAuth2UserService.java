@@ -27,6 +27,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
  * {@link OAuth2UserRequest#getClientRegistration() Client} and returning an
  * {@link AuthenticatedPrincipal} in the form of an {@link OAuth2User}.
  *
+ * 这个接口的实现 负责 从用户端点处访问 最终用户的用户属性 ...
+ * 通过使用 OAuth2UserRequest#getAccessToken() 授予客户端访问 并通过 OAuth2User的形式返回 AuthenticatedPrincipal
+ *
  * @param <R> The type of OAuth 2.0 User Request
  * @param <U> The type of OAuth 2.0 User
  * @author Joe Grandja

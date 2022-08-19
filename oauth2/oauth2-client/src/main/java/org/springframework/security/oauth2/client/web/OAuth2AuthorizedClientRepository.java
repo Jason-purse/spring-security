@@ -25,8 +25,12 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
 /**
+ *
+ * 这个接口的实现 负责在请求之间持久化 OAuth2AuthorizedClient 授权的客户端 ....
  * Implementations of this interface are responsible for the persistence of
  * {@link OAuth2AuthorizedClient Authorized Client(s)} between requests.
+ *
+ *
  *
  * <p>
  * The primary purpose of an {@link OAuth2AuthorizedClient Authorized Client} is to
@@ -34,6 +38,11 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
  * a {@link OAuth2AuthorizedClient#getClientRegistration() Client} and Resource Owner, who
  * is the {@link OAuth2AuthorizedClient#getPrincipalName() Principal} that originally
  * granted the authorization.
+ *
+ * OAuth2AuthorizedClient的主要目的是 为了关联一个 OAuth2AuthorizedClient#getAccessToken() 访问令牌 (凭证) 到一个
+ * OAuth2AuthorizedClient#getClientRegistration() 客户端 和资源拥有者 ...
+ *
+ * OAuth2AuthorizedClient#getPrincipalName 表示被授予授权的身份 ...
  *
  * @author Joe Grandja
  * @since 5.1

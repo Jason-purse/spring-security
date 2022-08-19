@@ -32,6 +32,8 @@ import org.springframework.util.Assert;
 /**
  * An {@link AbstractAuthenticationToken} for the OAuth 2.0 Authorization Code Grant.
  *
+ * OAuth 2.0 Authorization Code Grant 的一个 AbstractAuthenticationToken ...
+ *
  * @author Joe Grandja
  * @since 5.1
  * @see AbstractAuthenticationToken

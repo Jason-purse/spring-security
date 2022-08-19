@@ -38,6 +38,8 @@ import org.springframework.util.StringUtils;
  * A representation of a client registration with an OAuth 2.0 or OpenID Connect 1.0
  * Provider.
  *
+ * 向OAuth 2.0 或者 OpenID Connect 1.0 提供器注册的客户端的呈现 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc6749#section-2">Section 2

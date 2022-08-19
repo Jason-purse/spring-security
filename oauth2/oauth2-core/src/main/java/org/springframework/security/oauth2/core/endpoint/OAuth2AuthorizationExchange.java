@@ -22,6 +22,8 @@ import org.springframework.util.Assert;
  * An &quot;exchange&quot; of an OAuth 2.0 Authorization Request and Response for the
  * authorization code grant type.
  *
+ * 针对于授权码授予类型的 oauth2授权请求和响应的一个交换机 ..
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see OAuth2AuthorizationRequest

@@ -56,6 +56,14 @@ import org.springframework.web.client.UnknownContentTypeException;
  * therefore will vary. Please consult the provider's API documentation for the set of
  * supported user attribute names.
  *
+ * 默认的OAuth2 UserService 支持标注的 OAuth 2.0 提供器 ..
+ *
+ * 支持 oauth2  / open connect id 登录 ..
+ * 对于标准的 OAuth 2.0 提供器, 这个属性名被用来从 UserInfo 响应中访问 用户的名称(并且 它必须存在 ...
+ * 它设置于 ClientRegistration.ProviderDetails.UserInfoEndpoint#getUserNameAttributeName())
+ *
+ * 注意,这个属性名称并不是标准化的(对于不同提供器它们可能有所不同),请考虑 提供者API 文档了解它们所支持的用户属性名称 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see OAuth2UserService
@@ -87,6 +95,7 @@ public class DefaultOAuth2UserService implements OAuth2UserService<OAuth2UserReq
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		Assert.notNull(userRequest, "userRequest cannot be null");
+		// 默认的Oauth2UserService 判断 ..
 		if (!StringUtils
 				.hasText(userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUri())) {
 			OAuth2Error oauth2Error = new OAuth2Error(MISSING_USER_INFO_URI_ERROR_CODE,
@@ -95,8 +104,10 @@ public class DefaultOAuth2UserService implements OAuth2UserService<OAuth2UserReq
 					null);
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
 		}
+		// 然后获取用户名称属性 ...
 		String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint()
 				.getUserNameAttributeName();
+		// 如果没有,也报错 ...
 		if (!StringUtils.hasText(userNameAttributeName)) {
 			OAuth2Error oauth2Error = new OAuth2Error(MISSING_USER_NAME_ATTRIBUTE_ERROR_CODE,
 					"Missing required \"user name\" attribute name in UserInfoEndpoint for Client Registration: "
@@ -104,11 +115,16 @@ public class DefaultOAuth2UserService implements OAuth2UserService<OAuth2UserReq
 					null);
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
 		}
+		// 然后我们可以设置 RequestEntity Converter  转换用户请求为请求实体 ...
 		RequestEntity<?> request = this.requestEntityConverter.convert(userRequest);
+		// 然后请求并获取响应结果 ...
 		ResponseEntity<Map<String, Object>> response = getResponse(userRequest, request);
 		Map<String, Object> userAttributes = response.getBody();
 		Set<GrantedAuthority> authorities = new LinkedHashSet<>();
+
+		//
 		authorities.add(new OAuth2UserAuthority(userAttributes));
+		// 用户请求的访问 token .. 获取它的scope ... 并设置它的scope _ 授权信息 ...
 		OAuth2AccessToken token = userRequest.getAccessToken();
 		for (String authority : token.getScopes()) {
 			authorities.add(new SimpleGrantedAuthority("SCOPE_" + authority));
@@ -118,6 +134,7 @@ public class DefaultOAuth2UserService implements OAuth2UserService<OAuth2UserReq
 
 	private ResponseEntity<Map<String, Object>> getResponse(OAuth2UserRequest userRequest, RequestEntity<?> request) {
 		try {
+			// 它使用 restOperations  请求 ..
 			return this.restOperations.exchange(request, PARAMETERIZED_RESPONSE_TYPE);
 		}
 		catch (OAuth2AuthorizationException ex) {

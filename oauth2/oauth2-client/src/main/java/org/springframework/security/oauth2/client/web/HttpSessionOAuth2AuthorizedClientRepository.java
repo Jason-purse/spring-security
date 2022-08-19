@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
  * An implementation of an {@link OAuth2AuthorizedClientRepository} that stores
  * {@link OAuth2AuthorizedClient}'s in the {@code HttpSession}.
  *
+ * 这个实现将OAuth2AuthorizedClient 存储到HttpSession中的一个 OAuth2AuthorizedClientRepository 实现 ...
+ *
  * @author Joe Grandja
  * @since 5.1
  * @see OAuth2AuthorizedClientRepository

@@ -25,6 +25,11 @@ package org.springframework.security.oauth2.client.registration;
  * store a sub-set copy of the <i>primary</i> client registration information externally
  * from the Authorization Server.
  *
+ * 一个 OAuth 2.0 / OpenId Connect 1.0 ClientRegistration的仓库
+ *
+ * 注意:  客户端注册 信息通常由 相关的授权服务器存储并所属 ...
+ * 因此 这个仓库提供了一种能力去存储主要来自于外部授权服务器的子集 客户端注册信息 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see ClientRegistration

@@ -29,6 +29,8 @@ import org.springframework.util.CollectionUtils;
  * Represents a request the {@link OAuth2UserService} uses when initiating a request to
  * the UserInfo Endpoint.
  *
+ * Oauth2UserService 被用来 请求用户信息(当初始化一个请求到用户端点时,呈现此请求) ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see ClientRegistration

@@ -53,6 +53,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 /**
+ *
+ * 这才是认证的核心默认配置 ....
+ *
  * Exports the authentication {@link Configuration}
  *
  * 这个配置是在@EnableWebSecurity或者 @EnableGlobalMethodSecurity的时候导入的 ..
@@ -84,6 +87,7 @@ public class AuthenticationConfiguration {
 	private ObjectPostProcessor<Object> objectPostProcessor;
 
 //	暴露一个认证管理器构建器
+	// 这是全局的认证管理构建器 ...
 	@Bean
 	public AuthenticationManagerBuilder authenticationManagerBuilder(ObjectPostProcessor<Object> objectPostProcessor,
 			ApplicationContext context) {
@@ -103,8 +107,8 @@ public class AuthenticationConfiguration {
 	}
 
 	// 全局认证配置器适配器 ...
+	// 直接 在全局配置
 	// 以下三个都是 -----------------------------------
-	// 同样的交给 认证管理器 ...
 	@Bean
 	public static GlobalAuthenticationConfigurerAdapter enableGlobalAuthenticationAutowiredConfigurer(
 			ApplicationContext context) {
@@ -135,6 +139,7 @@ public class AuthenticationConfiguration {
 		if (this.authenticationManagerInitialized) {
 			return this.authenticationManager;
 		}
+		// 顶级认证管理器配置 ...
 		AuthenticationManagerBuilder authBuilder = this.applicationContext.getBean(AuthenticationManagerBuilder.class);
 		// 如果这里有了Bean,如果我们直接返回AuthenticationManagerBuilder.build 会怎么样,将导致无限递归 ..
 		// 为什么呢?? 先留下这个疑问 ..
@@ -147,12 +152,15 @@ public class AuthenticationConfiguration {
 		// 也就是用户配置之后的补丁 ...
 		// 保证程序能够正确的配置 。。。
 		for (GlobalAuthenticationConfigurerAdapter config : this.globalAuthConfigurers) {
+			// 应用 有些增加了一些 (初始化 阶段的configurer) .. 用来提前处理 ..
 			authBuilder.apply(config);
 		}
 
 		// 然后尝试构建 ...
 		// 将所有的 configurer 进行配置 .. 形成完成的authenticationManager ...
 		this.authenticationManager = authBuilder.build();
+
+		// 一般来说这不可能 ...
 		// 如果说返回的是(全局构建器Manager = null)
 		if (this.authenticationManager == null) {
 			// 懒加载一个 ....

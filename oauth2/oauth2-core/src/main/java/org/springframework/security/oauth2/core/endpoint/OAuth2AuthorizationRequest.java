@@ -43,6 +43,8 @@ import org.springframework.web.util.UriUtils;
  * A representation of an OAuth 2.0 Authorization Request for the authorization code grant
  * type or implicit grant type.
  *
+ * 代表一个授权码授予类型或者隐式授权类型的 OAuth 2.0 授权请求的呈现 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see AuthorizationGrantType

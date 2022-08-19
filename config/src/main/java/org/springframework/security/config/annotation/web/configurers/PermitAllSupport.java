@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Configures non-null URL's to grant access to every URL
  *
+ * 配置一个非空URL 授权访问每一个URL
  * @author Rob Winch
  * @since 3.2
  */

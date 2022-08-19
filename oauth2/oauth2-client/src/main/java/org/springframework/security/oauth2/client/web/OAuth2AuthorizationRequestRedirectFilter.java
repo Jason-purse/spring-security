@@ -42,6 +42,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * This {@code Filter} initiates the authorization code grant or implicit grant flow by
  * redirecting the End-User's user-agent to the Authorization Server's Authorization
  * Endpoint.
+ * 这个过滤器初始化 授权码授予 或者隐式的授予流(通过重定向最终用户的 用户代理(浏览器) 到 授权服务器的授权端点) ...
  *
  * <p>
  * It builds the OAuth 2.0 Authorization Request, which is used as the redirect
@@ -50,6 +51,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * which the authorization server will send the user-agent back to once access is granted
  * (or denied) by the End-User (Resource Owner).
  *
+ * 它构建一个OAuth2.0 授权请求, 这用来重定向 Authorization Endpoint ...
+ * 重定向URI 将包含客户端标识符 / 请求的 scope(范围), state / 响应类型  以及 一个重定向URI(当终端用户授予或者拒绝访问的时候用来发送给用户代理去返回到对应地址) ..
  * <p>
  * By default, this {@code Filter} responds to authorization requests at the {@code URI}
  * {@code /oauth2/authorization/{registrationId}} using the default
@@ -57,6 +60,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * {@code {registrationId}} represents the {@link ClientRegistration#getRegistrationId()
  * registration identifier} of the client that is used for initiating the OAuth 2.0
  * Authorization Request.
+ *
+ * 默认来说, 这个过滤器负责响应 /oauth2/authorization/registrationId的请求(使用 默认的 OAuth2AuthorizationRequestResolver) ..
+ * 这个URI 模板变量 {registrationId} 表示ClientRegistration#getRegistrationId() 客户端的注册身份 .. 它被用来初始化OAuth 2.0 授权请求 ...
  *
  * <p>
  * The default base {@code URI} {@code /oauth2/authorization} may be overridden via the
@@ -66,6 +72,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * constructor
  * {@link #OAuth2AuthorizationRequestRedirectFilter(OAuth2AuthorizationRequestResolver)}
  * to override the resolving of authorization requests.
+ *
+ * 默认的base URI {/oauth2/authorization} 能够使用构造器进行覆盖 ..
+ * @Auth2AutorizationRequestRedirectFilter(ClientRegistrationRepository,String) ..
+ * 除此之外,一个 OAuth2AuthorizationRequestResolver 能够提供给构造器 ...#OAuth2AuthorizationRequestRedirectFilter(OAuth2AuthorizationRequestResolver)
+ * 用来覆盖授权请求的解析 ...
+ *
+ * 通过它初始化一个 授权码授予流 ...
  *
  * @author Joe Grandja
  * @author Rob Winch
@@ -90,6 +103,7 @@ public class OAuth2AuthorizationRequestRedirectFilter extends OncePerRequestFilt
 
 	/**
 	 * The default base {@code URI} used for authorization requests.
+	 * 用于授权请求的默认 base URI ...
 	 */
 	public static final String DEFAULT_AUTHORIZATION_REQUEST_BASE_URI = "/oauth2/authorization";
 

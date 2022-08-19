@@ -31,6 +31,9 @@ import org.springframework.util.Assert;
  *
  * Can be subclassed to customize its behavior.
  *
+ * 用于分析Throwable 实例的处理器 ..
+ * 能够子类化定制化行为 ..
+ *
  * @author Andreas Senft
  * @since 2.0
  */

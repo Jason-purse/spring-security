@@ -74,7 +74,9 @@ class InitializeUserDetailsBeanManagerConfigurer extends GlobalAuthenticationCon
 			PasswordEncoder passwordEncoder = getBeanOrNull(PasswordEncoder.class);
 			// 获取 UserDetailsPasswordService
 			UserDetailsPasswordService passwordManager = getBeanOrNull(UserDetailsPasswordService.class);
-			// 为什么这里又直接 new了 ...
+
+			// 也就是默认会为我们配置一个 ..
+			// 最终形成了一个 具有hierarchy的AuthManager .. 进行认证管理 ...
 			DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 			provider.setUserDetailsService(userDetailsService);
 			if (passwordEncoder != null) {

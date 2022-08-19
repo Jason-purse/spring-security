@@ -33,6 +33,10 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
  * }
  * </pre>
  *
+ * 直接单纯的为了定制WebSecurity的回调接口 ..
+ * 因为这个类型的 bean 将会自动的被WebSecurityConfiguration 用来定制 WebSecurity ..
+ * 就是单纯的定制 ...
+ *
  * @author Eleftheria Stein
  * @since 5.4
  */

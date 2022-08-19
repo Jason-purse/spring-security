@@ -37,10 +37,14 @@ import org.springframework.web.client.RestTemplate;
 /**
  * An implementation of an {@link OAuth2UserService} that supports custom
  * {@link OAuth2User} types.
+ *
+ * 支持自定义OAuth2User 类型的 OAuth2UserService 实现 ...
  * <p>
  * The custom user type(s) is supplied via the constructor, using a {@code Map} of
  * {@link OAuth2User} type(s) keyed by {@code String}, which represents the
  * {@link ClientRegistration#getRegistrationId() Registration Id} of the Client.
+ *
+ * 这些自定义用户类型通过构造器应用 .. 通过Stringkey(针对给定的ClientRegistration#getRegistrationId()  ) 映射到对应的OAuth2User type ...
  *
  * @author Joe Grandja
  * @since 5.0
@@ -54,6 +58,9 @@ import org.springframework.web.client.RestTemplate;
  * <a target="_blank" href=
  * "https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2login-advanced-map-authorities-oauth2userservice">reference
  * manual</a> for details on how to implement.
+ *
+ * 推荐 使用基于代理的 OAuth2UserService 支持自定义OAuth2User 类型 ..
+ * 它提供了更多的灵活性 。。。
  */
 @Deprecated
 public class CustomUserTypesOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {

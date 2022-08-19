@@ -40,6 +40,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 /**
  * {@link Configuration} that exposes the {@link HttpSecurity} bean.
  *
+ * 用来暴露一个HttpSecurity Bean ...
  *
  * 暴露一个 HttpSecurity Bean
  * @author Eleftheria Stein
@@ -79,6 +80,11 @@ class HttpSecurityConfiguration {
 		this.context = context;
 	}
 
+	/**
+	 * 它将被 Springboot 的SpringBootWebSecurityConfiguration 一个 bean 需要 ..
+	 * @return
+	 * @throws Exception
+	 */
 	@Bean(HTTPSECURITY_BEAN_NAME)
 	@Scope("prototype")
 	HttpSecurity httpSecurity() throws Exception {
@@ -108,6 +114,7 @@ class HttpSecurityConfiguration {
 		return http;
 	}
 
+	// 默认拿取认证配置的 认证管理器
 	private AuthenticationManager authenticationManager() throws Exception {
 		return (this.authenticationManager != null) ? this.authenticationManager
 				: this.authenticationConfiguration.getAuthenticationManager();

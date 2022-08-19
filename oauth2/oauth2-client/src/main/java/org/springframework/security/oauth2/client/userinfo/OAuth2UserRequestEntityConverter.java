@@ -61,12 +61,15 @@ public class OAuth2UserRequestEntityConverter implements Converter<OAuth2UserReq
 				.fromUriString(clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri()).build().toUri();
 
 		RequestEntity<?> request;
+
+		// 基于表单登录 ...
 		if (HttpMethod.POST.equals(httpMethod)) {
 			headers.setContentType(DEFAULT_CONTENT_TYPE);
 			MultiValueMap<String, String> formParameters = new LinkedMultiValueMap<>();
 			formParameters.add(OAuth2ParameterNames.ACCESS_TOKEN, userRequest.getAccessToken().getTokenValue());
 			request = new RequestEntity<>(formParameters, headers, httpMethod, uri);
 		}
+		// 如果不是post ... 设置 bearerAuth ...
 		else {
 			headers.setBearerAuth(userRequest.getAccessToken().getTokenValue());
 			request = new RequestEntity<>(headers, httpMethod, uri);

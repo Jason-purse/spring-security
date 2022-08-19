@@ -25,12 +25,15 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
  * Implementations of this interface are responsible for the persistence of
  * {@link OAuth2AuthorizationRequest} between requests.
  *
+ * 实现负责在请求之间持久化 OAuth2AuthorizationRequest ...
  * <p>
  * Used by the {@link OAuth2AuthorizationRequestRedirectFilter} for persisting the
  * Authorization Request before it initiates the authorization code grant flow. As well,
  * used by the {@link OAuth2LoginAuthenticationFilter} for resolving the associated
  * Authorization Request when handling the callback of the Authorization Response.
  *
+ * 被Oauth2AuthorizationRequestRedirectFilter 用来持久化授权请求(在它初始化 授权码授予流之前) ..
+ * 同样被OAuth2LoginAuthenticationFilter 用来 解析关联的授权请求(当处理授权响应的回调时) ..
  * @param <T> The type of OAuth 2.0 Authorization Request
  * @author Joe Grandja
  * @since 5.0
@@ -73,6 +76,7 @@ public interface AuthorizationRequestRepository<T extends OAuth2AuthorizationReq
 	 * Removes and returns the {@link OAuth2AuthorizationRequest} associated to the
 	 * provided {@code HttpServletRequest} and {@code HttpServletResponse} or if not
 	 * available returns {@code null}.
+	 * 根据提供的 request / response ..
 	 * @param request the {@code HttpServletRequest}
 	 * @param response the {@code HttpServletResponse}
 	 * @return the {@link OAuth2AuthorizationRequest} or {@code null} if not available

@@ -58,6 +58,16 @@ import org.springframework.util.StringUtils;
  * {@link PortMapper} is consulted to determine the HTTP:HTTPS pairs. The value of
  * {@code forceHttps} will have no effect if an absolute URL is used.
  *
+ * 这就是一个非常简单的 认证端点 ...
+ * 用来执行表单登录 ...
+ *
+ * 主要动作就是构建一个重定向URL 到登录页面 ... 除此之外,绝对URL 能够设置并以独占式的访问 ...
+ * 当使用相对URL 时,需要设置forceHttps 属性为 ture, 去强制此协议(被使用的登录形式转换为https) ..
+ * 即使原来的被拦截的请求(请求资源的)使用的是 http 协议 ..
+ * 当这样的事情发生之后,通过 https 成功登录之后,原来的资源仍然能够通过 http 处理(通过原来的请求url) ...
+ * 为了让强制的Https 特性 工作,PortMapper 将被考虑用来决定(判断) HTTP:HTTPS 对 ..
+ * forceHttps的值对于绝对路径URL 没有任何影响 ..
+ *
  * @author Ben Alex
  * @author colin sampaleanu
  * @author Omri Spector

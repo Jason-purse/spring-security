@@ -26,6 +26,11 @@ import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.util.Assert;
 
 /**
+ *
+ * 此类代表了  一个Oauth 2.0 已授权的客户端 ..
+ * 当最终用户(资源拥有者) 已经授权此客户端访问它的保护的资源 ...
+ * 这个类会关联客户端注册 到由资源拥有者(#getPrincipalName) 授予 / 授权的 访问Token(这个token 代表用户的身份,进行用户资源访问) ..
+ *
  * A representation of an OAuth 2.0 &quot;Authorized Client&quot;.
  * <p>
  * A client is considered &quot;authorized&quot; when the End-User (Resource Owner) has

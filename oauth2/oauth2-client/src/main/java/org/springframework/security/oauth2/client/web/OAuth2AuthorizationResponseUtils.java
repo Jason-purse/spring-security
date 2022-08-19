@@ -18,6 +18,7 @@ package org.springframework.security.oauth2.client.web;
 
 import java.util.Map;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.util.LinkedMultiValueMap;
@@ -27,6 +28,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for an OAuth 2.0 Authorization Response.
  *
+ * oauth 2.0 授权响应的工具类方法 ...
  * @author Joe Grandja
  * @since 5.1
  * @see OAuth2AuthorizationResponse
@@ -45,6 +47,7 @@ final class OAuth2AuthorizationResponseUtils {
 				}
 			}
 		});
+
 		return params;
 	}
 
@@ -63,14 +66,23 @@ final class OAuth2AuthorizationResponseUtils {
 	}
 
 	static OAuth2AuthorizationResponse convert(MultiValueMap<String, String> request, String redirectUri) {
+		// 首先拿到 CODE .
 		String code = request.getFirst(OAuth2ParameterNames.CODE);
+		// 拿到 ERROR
 		String errorCode = request.getFirst(OAuth2ParameterNames.ERROR);
+		// 拿取 STATE
 		String state = request.getFirst(OAuth2ParameterNames.STATE);
+		// 如果存在CODE ..
 		if (StringUtils.hasText(code)) {
+			// 构建响应 ..
 			return OAuth2AuthorizationResponse.success(code).redirectUri(redirectUri).state(state).build();
 		}
+
+		// 否则 拿取错误描述
 		String errorDescription = request.getFirst(OAuth2ParameterNames.ERROR_DESCRIPTION);
+		// 拿取错误uri
 		String errorUri = request.getFirst(OAuth2ParameterNames.ERROR_URI);
+
 		// @formatter:off
 		return OAuth2AuthorizationResponse.error(errorCode)
 				.redirectUri(redirectUri)

@@ -42,6 +42,11 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
  * {@link AuthenticationPrincipalArgumentResolver} as a
  * {@link HandlerMethodArgumentResolver}.
  *
+ *
+ * 被用来为Spring mvc 增加一个RequestDataValueProcessor ... 以及 Spring security CSRF 令牌集成 ..
+ * 这个配置仅当EnableWebMvc开启时并且 DispatcherServlet 出现在类路径上 才会增加 ...  ..
+ * 同样它也添加了AuthenticationPrincipalArgumentResolver 作为一个HandlerMethodArgumentResolver ...
+ *
  * @author Rob Winch
  * @author Dan Zheng
  * @since 3.2

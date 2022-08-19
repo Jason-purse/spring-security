@@ -42,6 +42,8 @@ import org.springframework.web.client.RestTemplate;
  * implementation uses a {@link RestOperations} when requesting an access token credential
  * at the Authorization Server's Token Endpoint.
  *
+ * 也就是说,这个默认实现 针对 授权码授予 进行访问 token 凭证交换(当在授权服务器的token 端点处 使用RestOptions请求一个访问 token 凭证时) ..
+ *
  * @author Joe Grandja
  * @since 5.1
  * @see OAuth2AccessTokenResponseClient
@@ -74,7 +76,10 @@ public final class DefaultAuthorizationCodeTokenResponseClient
 	public OAuth2AccessTokenResponse getTokenResponse(
 			OAuth2AuthorizationCodeGrantRequest authorizationCodeGrantRequest) {
 		Assert.notNull(authorizationCodeGrantRequest, "authorizationCodeGrantRequest cannot be null");
+		// 请求可以根据自定义的转换器转换
 		RequestEntity<?> request = this.requestEntityConverter.convert(authorizationCodeGrantRequest);
+
+		// 同样可以修改 restOptions 例如增加请求参数等 ..
 		ResponseEntity<OAuth2AccessTokenResponse> response = getResponse(request);
 		OAuth2AccessTokenResponse tokenResponse = response.getBody();
 		if (CollectionUtils.isEmpty(tokenResponse.getAccessToken().getScopes())) {

@@ -24,6 +24,8 @@ import org.springframework.util.StringUtils;
  * A representation of an OAuth 2.0 Authorization Response for the authorization code
  * grant type.
  *
+ * 一个OAuth 2.0 授权响应的呈现(对于 授权码授予类型) ..
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see OAuth2Error

@@ -27,6 +27,10 @@ import org.springframework.security.core.Authentication;
  * If {@link #anonymousClass} or {@link #rememberMeClass} is <code>null</code>, the
  * corresponding method will always return <code>false</code>.
  *
+ * 一个简单的认证 Token 解析器 ..
+ * 基于给定的token 是否属于特定的类来做出可信赖的决定 ...
+ * 如果匿名类 /  rememberMeClass 为null, 结果总是false ...
+ *
  * @author Ben Alex
  */
 public class AuthenticationTrustResolverImpl implements AuthenticationTrustResolver {

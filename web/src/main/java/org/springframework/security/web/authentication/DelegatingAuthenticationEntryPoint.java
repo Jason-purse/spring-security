@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * An {@code AuthenticationEntryPoint} which selects a concrete
  * {@code AuthenticationEntryPoint} based on a {@link RequestMatcher} evaluation.
  *
+ * 这个认证端点选择一个具体的认证端点进行认证,基于RequestMatcher 评估 ...
  * <p>
  * A configuration might look like this:
  * </p>

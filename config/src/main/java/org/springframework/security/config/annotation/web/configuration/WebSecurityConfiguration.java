@@ -60,7 +60,8 @@ import org.springframework.util.Assert;
  * configuration is imported when using {@link EnableWebSecurity}.
  *
  * 使用一个 WebSecurity 创建 FilterChainProxy(然后执行基于web的安全)
- * 它将暴露一些必要的bean,通过扩展WebSecurityConfigurerAdapter 实现 WebSecurity的定制并且将它暴露为一个@Configuration或者
+ * 它将暴露一些必要的bean,通过扩展WebSecurityConfigurerAdapter 实现 WebSecurity的定制并且将它暴露为一个@Configuration
+ * 或者
  * 实现 WebSecurityConfigurer 然后将它暴露为一个Configuration ... 这个配置在使用@EnableWebSecurity的时候会自动进行导入 ....
  *
  * 因为这个类会收集 List<WebSecurityConfigurer>
@@ -82,6 +83,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	private Boolean debugEnabled;
 
 	//	WebSecurityConfigurer 定制
+	// 已经从容器中收集的WebSecurityConfigurer 定制器 ..
 	private List<SecurityConfigurer<Filter, WebSecurity>> webSecurityConfigurers;
 
 	// 多个过滤器链 ..
@@ -136,6 +138,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 		// 也就是从这里,我们看出了,spring security 团队建议我们直接注入httpSecurity 暴露 securityFilterChain的原因 ...
 		// 如果我们没有使用这种方式,采用了 WebSecurityConfigurerAdapter继承的形式,那么 就相当于使用我们自己的 WebSecurityConfigurerAdapter(作为一个bean,也 直接被ioc容器处理了,也就没必要默认添加一个WebSecurityConfigurerAdapter ).
 		if (!hasConfigurers && !hasFilterChain) {
+			// 如果都没有,则采用这种形式,现在很少了 ... (基本上不可能见到)
 			// 然后通过后置处理器进行了后置处理,比较特殊 ..
 			// 如果采用默认的形式 ...
 			WebSecurityConfigurerAdapter adapter = this.objectObjectPostProcessor
@@ -207,6 +210,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 		}
 
 
+		// 获取所有的WebSecurityConfigurer
 		List<SecurityConfigurer<Filter, WebSecurity>> webSecurityConfigurers = new AutowiredWebSecurityConfigurersIgnoreParents(
 				beanFactory).getWebSecurityConfigurers();
 
@@ -226,7 +230,9 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 			previousConfig = config;
 		}
 
-		// 问题就来了,如何收集的这些构建器 ..
+		// 然后应用到WebSecurity上 ...
+		// 很自然,本身这个 webSecurityConfigurer 是一个配置器(它能够指定一个构建器,然后构建出什么东西) ... 通过configurer 来扩展 builder的能力 ...
+		// 这里它们就是
 		// 也就是我们向 容器中注入的 SecurityConfigurer<Filter, WebSecurity>, 我们可以对WebSecurity 进行配置 ...
 		for (SecurityConfigurer<Filter, WebSecurity> webSecurityConfigurer : webSecurityConfigurers) {
 			// 开始应用 ... (入口)
@@ -235,11 +241,19 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 		this.webSecurityConfigurers = webSecurityConfigurers;
 	}
 
+	/**
+	 * 将过滤链搜集起来 ...
+	 * @param securityFilterChains 过滤链 列表
+	 */
 	@Autowired(required = false)
 	void setFilterChains(List<SecurityFilterChain> securityFilterChains) {
 		this.securityFilterChains = securityFilterChains;
 	}
 
+	/**
+	 * 还有WebSecurityCustomizer ..
+	 * @param webSecurityCustomizers
+	 */
 	@Autowired(required = false)
 	void setWebSecurityCustomizers(List<WebSecurityCustomizer> webSecurityCustomizers) {
 		this.webSecurityCustomizers = webSecurityCustomizers;

@@ -35,6 +35,12 @@ import org.springframework.util.StringUtils;
  * module as well as the {@code spring-webflux} module are present on the classpath</li>
  * </ul>
  *
+ * 被EnableWebSecurity 条件导入:
+ * - OAuth2ClientConfiguration (当spring-security-oauth2-client 出现在类路径上时) ...
+ * - spring-security-oauth2-client 或者 spring-security-oauth2-resource-server 模块以及 spring-webflux 模块出现在类路径上时 ...
+ *
+ *
+ *
  * @author Joe Grandja
  * @author Josh Cummings
  * @since 5.1

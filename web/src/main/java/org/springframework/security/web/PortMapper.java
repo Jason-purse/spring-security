@@ -20,6 +20,8 @@ package org.springframework.security.web;
  * <code>PortMapper</code> implementations provide callers with information about which
  * HTTP ports are associated with which HTTPS ports on the system, and vice versa.
  *
+ * 这个PortMapper 实现提供调用者有关在系统上指定的 http 端口 和 https 端口的关联 .. 反之亦然 ..
+ *
  * @author Ben Alex
  */
 public interface PortMapper {

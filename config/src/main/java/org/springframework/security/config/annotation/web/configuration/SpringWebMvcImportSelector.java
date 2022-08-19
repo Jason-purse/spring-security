@@ -25,6 +25,9 @@ import org.springframework.util.ClassUtils;
  * {@link WebMvcSecurityConfiguration} when the DispatcherServlet is present on the
  * classpath.
  *
+ *
+ * 由EnableWebSecurity 使用条件导入 WebMvcSecurityConfiguration ... (当DispatcherServlet 出现在类路径上的时候) ...
+ *
  * @author Rob Winch
  * @since 3.2
  */

@@ -33,6 +33,16 @@ import org.springframework.security.web.SecurityFilterChain;
  * will automatically be applied to the {@link WebSecurity} by the
  * {@link EnableWebSecurity} annotation.
  *
+ * 这个接口 用来定制 WebSecurity , 在多数情况下用户将使用@EnableWebSecurity 或者 创建一个@Configuration 继承WebSecurityConfigurerAdapter  / 又或者直接暴露一个 SecurityFilterChain ..
+ *
+ * 它将自动的通过@EnableWebSecurity 自动的应用到 WebSecurity ..
+ *
+ *
+ *
+ * 首先,WebSecurityConfiguration 会自动的创建一个 WebSecurity ,然后会通过bean 上下文容器获取所有的 WebSecurityConfigurer ...
+ *
+ *
+ *
  * @author Rob Winch
  * @since 3.2
  * @see WebSecurityConfigurerAdapter

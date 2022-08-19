@@ -39,15 +39,22 @@ import org.springframework.util.Assert;
  * An implementation of an {@link AuthenticationProvider} for OAuth 2.0 Login, which
  * leverages the OAuth 2.0 Authorization Code Grant Flow.
  *
+ * 这个提供者实现,  进行oauth2 登录,它利用了oauth2.0 授权码授予流 ...
+ *
  * This {@link AuthenticationProvider} is responsible for authenticating an Authorization
  * Code credential with the Authorization Server's Token Endpoint and if valid, exchanging
  * it for an Access Token credential.
+ *
+ * 这个认证提供器 负责认证一个授权码凭证(通过授权服务器的 token 认证端点,如果有效,交换访问 token 凭证) ...
  * <p>
  * It will also obtain the user attributes of the End-User (Resource Owner) from the
  * UserInfo Endpoint using an {@link OAuth2UserService}, which will create a
  * {@code Principal} in the form of an {@link OAuth2User}. The {@code OAuth2User} is then
  * associated to the {@link OAuth2LoginAuthenticationToken} to complete the
  * authentication.
+ *
+ * 它使用OAuth2UserService 从 用户端点中获取最终用户(资源拥有者)的用户属性 ....
+ * 它会创建一个身份(形式为 OAuth2User) ... 这个user 会关联到 OAuth2LoginAuthenticationToken 去完成认证 ...
  *
  * @author Joe Grandja
  * @since 5.0
@@ -66,10 +73,13 @@ import org.springframework.util.Assert;
  */
 public class OAuth2LoginAuthenticationProvider implements AuthenticationProvider {
 
+	// 然后它将代理到 授权码认证提供器 ...
 	private final OAuth2AuthorizationCodeAuthenticationProvider authorizationCodeAuthenticationProvider;
 
+	// user request -> user ..(这是最后一步)....
 	private final OAuth2UserService<OAuth2UserRequest, OAuth2User> userService;
 
+	// 授予认证映射 ...
 	private GrantedAuthoritiesMapper authoritiesMapper = ((authorities) -> authorities);
 
 	/**
@@ -91,10 +101,12 @@ public class OAuth2LoginAuthenticationProvider implements AuthenticationProvider
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+		// 开始验证 ....
 		OAuth2LoginAuthenticationToken loginAuthenticationToken = (OAuth2LoginAuthenticationToken) authentication;
 		// Section 3.1.2.1 Authentication Request -
 		// https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest scope
 		// REQUIRED. OpenID Connect requests MUST contain the "openid" scope value.
+		// 如果是 openid ... 让 OidcAuthorizationCodeAuthenticationProvider 处理 ...
 		if (loginAuthenticationToken.getAuthorizationExchange().getAuthorizationRequest().getScopes()
 				.contains("openid")) {
 			// This is an OpenID Connect Authentication Request so return null
@@ -102,6 +114,8 @@ public class OAuth2LoginAuthenticationProvider implements AuthenticationProvider
 			return null;
 		}
 		OAuth2AuthorizationCodeAuthenticationToken authorizationCodeAuthenticationToken;
+
+		// 然后根据授权码认证提供器进行认证 ...
 		try {
 			authorizationCodeAuthenticationToken = (OAuth2AuthorizationCodeAuthenticationToken) this.authorizationCodeAuthenticationProvider
 					.authenticate(new OAuth2AuthorizationCodeAuthenticationToken(
@@ -112,12 +126,18 @@ public class OAuth2LoginAuthenticationProvider implements AuthenticationProvider
 			OAuth2Error oauth2Error = ex.getError();
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString(), ex);
 		}
+
+		// 如果认证成功,获取访问 Token ...
 		OAuth2AccessToken accessToken = authorizationCodeAuthenticationToken.getAccessToken();
+		// 获取额外的参数 ...
 		Map<String, Object> additionalParameters = authorizationCodeAuthenticationToken.getAdditionalParameters();
+		// 通过用户服务(也就是现在拿到了AccessToken,如何获取用户并映射 权限交给我们用户处理) ...
 		OAuth2User oauth2User = this.userService.loadUser(new OAuth2UserRequest(
 				loginAuthenticationToken.getClientRegistration(), accessToken, additionalParameters));
+		// 用户拿到了,通过 GrantedAuthoritiesMapper 进行权限映射 ...
 		Collection<? extends GrantedAuthority> mappedAuthorities = this.authoritiesMapper
 				.mapAuthorities(oauth2User.getAuthorities());
+		// 然后重新创建 OAuth2LoginAuthenticationToken
 		OAuth2LoginAuthenticationToken authenticationResult = new OAuth2LoginAuthenticationToken(
 				loginAuthenticationToken.getClientRegistration(), loginAuthenticationToken.getAuthorizationExchange(),
 				oauth2User, mappedAuthorities, accessToken, authorizationCodeAuthenticationToken.getRefreshToken());

@@ -84,16 +84,25 @@ import org.springframework.util.ClassUtils;
  * An {@link AbstractHttpConfigurer} for OAuth 2.0 Login, which leverages the OAuth 2.0
  * Authorization Code Grant Flow.
  *
+ * oauth 2.0 登录的抽象 http 配置器 ...
+ * 通过oauth2.0 授权码授予流 ..
+ *
  * <p>
  * OAuth 2.0 Login provides an application with the capability to have users log in by
  * using their existing account at an OAuth 2.0 or OpenID Connect 1.0 Provider.
  *
+ * 	oauth2.0 登录让应用具有能力(使得用户能够通过它们存在的账户在 OAuth 2.0 或者 OpenId 连接 1.0 提供器上进行登录) ..
  * <p>
  * Defaults are provided for all configuration options with the only required
  * configuration being
  * {@link #clientRegistrationRepository(ClientRegistrationRepository)}. Alternatively, a
  * {@link ClientRegistrationRepository} {@code @Bean} may be registered instead.
  *
+ * 所有的配置选项已经提供,仅仅需要配置 clientRegistrationRepository(ClientRegistrationRepository) ..
+ * 除此之外, ClientRegistrationRepository @Bean 也可以注册(用于替代 ClientRegistrationRepository ) ..
+ *
+ *
+ *  它会增加以下的安全过滤器 ...
  * <h2>Security Filters</h2>
  *
  * The following {@code Filter}'s are populated:
@@ -102,7 +111,10 @@ import org.springframework.util.ClassUtils;
  * <li>{@link OAuth2AuthorizationRequestRedirectFilter}</li>
  * <li>{@link OAuth2LoginAuthenticationFilter}</li>
  * </ul>
+ * 1. OAuth2AuthorizationRequestRedirectFilter 授权请求重定向过滤器 ..
+ * 2. OAuth2LoginAuthenticationFilter 登录认证过滤器 ...
  *
+ * 将会创建以下的共享对象 ...
  * <h2>Shared Objects Created</h2>
  *
  * The following shared objects are populated:
@@ -113,18 +125,29 @@ import org.springframework.util.ClassUtils;
  * <li>{@link GrantedAuthoritiesMapper} (optional)</li>
  * </ul>
  *
+ * 1. ClientRegistrationRepository(必须的) ...
+ * 2. OAuth2AuthorizedClientRepository (可选的) ..
+ * 3. GrantedAuthoritiesMapper (可选的) ...
+ *
+ * 被使用的共享对象:
  * <h2>Shared Objects Used</h2>
  *
  * The following shared objects are used:
  *
  * <ul>
- * <li>{@link ClientRegistrationRepository}</li>
- * <li>{@link OAuth2AuthorizedClientRepository}</li>
- * <li>{@link GrantedAuthoritiesMapper}</li>
+ * <li>{@link ClientRegistrationRepository}</li>  管理/存储客户端注册的仓库 ...
+ * <li>{@link OAuth2AuthorizedClientRepository}</li> 请求之间持久化OAuth2AuthorizeClient ...
+ * <li>{@link GrantedAuthoritiesMapper}</li> 授予权限映射器 ...
  * <li>{@link DefaultLoginPageGeneratingFilter} - if {@link #loginPage(String)} is not
  * configured and {@code DefaultLoginPageGeneratingFilter} is available, then a default
  * login page will be made available</li>
  * </ul>
+ *
+ * 1. ClientRegistrationRepository
+ * 2. OAuth2AuthorizedClientRepository
+ * 3. GrantedAuthoritiesMapper
+ * 4. DefaultLoginPageGeneratingFilter
+ * 		如果loginPage(没有配置),并且 DefaultLoginPageGeneratingFilter是可用的,那么 默认的登录页面也变得可用 ...
  *
  * @author Joe Grandja
  * @author Kazuki Shimizu
@@ -139,16 +162,29 @@ import org.springframework.util.ClassUtils;
 public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 		extends AbstractAuthenticationFilterConfigurer<B, OAuth2LoginConfigurer<B>, OAuth2LoginAuthenticationFilter> {
 
+	// 授权端点
 	private final AuthorizationEndpointConfig authorizationEndpointConfig = new AuthorizationEndpointConfig();
 
+	/**
+	 * access token 端点 ...
+	 */
 	private final TokenEndpointConfig tokenEndpointConfig = new TokenEndpointConfig();
 
+	/**
+	 * 重定向端点配置 ...
+	 */
 	private final RedirectionEndpointConfig redirectionEndpointConfig = new RedirectionEndpointConfig();
 
+	/**
+	 * 用户信息端点配置
+	 */
 	private final UserInfoEndpointConfig userInfoEndpointConfig = new UserInfoEndpointConfig();
+
 
 	private String loginPage;
 
+	// 登录的处理url(默认值)
+	// 在这里也能看出来它使用的默认值是  OAuth2LoginAuthenticationFilter.DEFAULT_FILTER_PROCESSES_URI
 	private String loginProcessingUrl = OAuth2LoginAuthenticationFilter.DEFAULT_FILTER_PROCESSES_URI;
 
 	/**
@@ -287,48 +323,85 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 
 	@Override
 	public void init(B http) throws Exception {
+
+		// init phase ..
+
+		// oauth2 授权登录入口 ..过滤器 .. 创建
 		OAuth2LoginAuthenticationFilter authenticationFilter = new OAuth2LoginAuthenticationFilter(
 				OAuth2ClientConfigurerUtils.getClientRegistrationRepository(this.getBuilder()),
 				OAuth2ClientConfigurerUtils.getAuthorizedClientRepository(this.getBuilder()), this.loginProcessingUrl);
+
+		// 然后并设置认证过滤器 ..
 		this.setAuthenticationFilter(authenticationFilter);
+
+		// 设置登录处理过滤器 ..
 		super.loginProcessingUrl(this.loginProcessingUrl);
+
+		// 表示自定义页面 ..
 		if (this.loginPage != null) {
 			// Set custom login page
+			// 当设置了自定义的登录页面之后,认证端点也会发生变化
 			super.loginPage(this.loginPage);
 			super.init(http);
 		}
 		else {
+			// 当没有自定义页面时,则获取登录Links
 			Map<String, String> loginUrlToClientName = this.getLoginLinks();
 			if (loginUrlToClientName.size() == 1) {
 				// Setup auto-redirect to provider login page
 				// when only 1 client is configured
+				// 当仅仅只有一个客户端配置的时候,实现自动重定向到provider 登录页面 ...
 				this.updateAuthenticationDefaults();
 				this.updateAccessDefaults(http);
+
 				String providerLoginPage = loginUrlToClientName.keySet().iterator().next();
+				// 注册 认证端点 ...
 				this.registerAuthenticationEntryPoint(http, this.getLoginEntryPoint(http, providerLoginPage));
 			}
 			else {
+				// 否则调用 父类的init ..
 				super.init(http);
 			}
 		}
+
+		// 然后获取 访问token 响应client ..
 		OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient = this.tokenEndpointConfig.accessTokenResponseClient;
 		if (accessTokenResponseClient == null) {
+			// 如果没有设置一个  .
 			accessTokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
 		}
+		// Oauth2UserService ..
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService = getOAuth2UserService();
+
+		// 开始构建提供器 ...
+		// 主要使用 userService,相比于 username/password,的情况下,它大致验证流程差不多 ...
 		OAuth2LoginAuthenticationProvider oauth2LoginAuthenticationProvider = new OAuth2LoginAuthenticationProvider(
 				accessTokenResponseClient, oauth2UserService);
+
+		// 是否存在授予授权映射器
 		GrantedAuthoritiesMapper userAuthoritiesMapper = this.getGrantedAuthoritiesMapper();
+
 		if (userAuthoritiesMapper != null) {
+			// 如果存在,则设置 ..
 			oauth2LoginAuthenticationProvider.setAuthoritiesMapper(userAuthoritiesMapper);
 		}
+		// 认证提供器,增加 ..
 		http.authenticationProvider(this.postProcess(oauth2LoginAuthenticationProvider));
+
+		// oidc 认证提供器是否启动.也就是判断 JwtDecoder 是否存在 ...
 		boolean oidcAuthenticationProviderEnabled = ClassUtils
 				.isPresent("org.springframework.security.oauth2.jwt.JwtDecoder", this.getClass().getClassLoader());
+
+		// 如果存在 ..
 		if (oidcAuthenticationProviderEnabled) {
+			// 获取 oidcUserService ..
 			OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService = getOidcUserService();
+
+			// 增加一个 Oidc 认证提供器 ..
+			// 这两种是基于策略实现的 .
 			OidcAuthorizationCodeAuthenticationProvider oidcAuthorizationCodeAuthenticationProvider = new OidcAuthorizationCodeAuthenticationProvider(
 					accessTokenResponseClient, oidcUserService);
+
 			JwtDecoderFactory<ClientRegistration> jwtDecoderFactory = this.getJwtDecoderFactoryBean();
 			if (jwtDecoderFactory != null) {
 				oidcAuthorizationCodeAuthenticationProvider.setJwtDecoderFactory(jwtDecoderFactory);
@@ -346,33 +419,55 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 
 	@Override
 	public void configure(B http) throws Exception {
+
+		// 真正的配置 ...
+
 		OAuth2AuthorizationRequestRedirectFilter authorizationRequestFilter;
 		if (this.authorizationEndpointConfig.authorizationRequestResolver != null) {
+			// 自定义的授权请求解析器
 			authorizationRequestFilter = new OAuth2AuthorizationRequestRedirectFilter(
 					this.authorizationEndpointConfig.authorizationRequestResolver);
 		}
 		else {
+			// 否则 根据默认配置拼接 ..
+			// 基于授权请求的base URI 进行处理 ..
 			String authorizationRequestBaseUri = this.authorizationEndpointConfig.authorizationRequestBaseUri;
 			if (authorizationRequestBaseUri == null) {
+				// 没有配置  默认配置
 				authorizationRequestBaseUri = OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 			}
+
+			// 获取ClientRegistrationRepository ...
+			// 并设定授权请求 base URI ..
 			authorizationRequestFilter = new OAuth2AuthorizationRequestRedirectFilter(
 					OAuth2ClientConfigurerUtils.getClientRegistrationRepository(this.getBuilder()),
 					authorizationRequestBaseUri);
 		}
+
+		// 如果存在授权请求仓库 ..
 		if (this.authorizationEndpointConfig.authorizationRequestRepository != null) {
+			// 被用来映射对应的授权请求 ..
 			authorizationRequestFilter
 					.setAuthorizationRequestRepository(this.authorizationEndpointConfig.authorizationRequestRepository);
 		}
+
+		// 是否存在请求缓存..
 		RequestCache requestCache = http.getSharedObject(RequestCache.class);
+		// 如果有,则设置 ..
 		if (requestCache != null) {
 			authorizationRequestFilter.setRequestCache(requestCache);
 		}
+
 		http.addFilter(this.postProcess(authorizationRequestFilter));
+
+		// 获取初始化好的 oauth2 登录认证过滤器 ..
 		OAuth2LoginAuthenticationFilter authenticationFilter = this.getAuthenticationFilter();
+
+		// 用来接收认证响应 ...
 		if (this.redirectionEndpointConfig.authorizationResponseBaseUri != null) {
 			authenticationFilter.setFilterProcessesUrl(this.redirectionEndpointConfig.authorizationResponseBaseUri);
 		}
+		// 设置授权请求仓库 ..
 		if (this.authorizationEndpointConfig.authorizationRequestRepository != null) {
 			authenticationFilter
 					.setAuthorizationRequestRepository(this.authorizationEndpointConfig.authorizationRequestRepository);
@@ -429,20 +524,28 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 	}
 
 	private OAuth2UserService<OAuth2UserRequest, OAuth2User> getOAuth2UserService() {
+		// 如果存在配置 直接返回 ..
 		if (this.userInfoEndpointConfig.userService != null) {
 			return this.userInfoEndpointConfig.userService;
 		}
 		ResolvableType type = ResolvableType.forClassWithGenerics(OAuth2UserService.class, OAuth2UserRequest.class,
 				OAuth2User.class);
+		// 根据这个类型 从 bean 中返回 .. 如果有则返回 ..
 		OAuth2UserService<OAuth2UserRequest, OAuth2User> bean = getBeanOrNull(type);
 		if (bean != null) {
 			return bean;
 		}
+
+		// 对于自定义的 OAuth2 情况,可能需要额外的 OAuth2User 类型 ..
 		if (this.userInfoEndpointConfig.customUserTypes.isEmpty()) {
+			//但是如果为空,则直接可以使用默认的 OAuth2UserService ..
 			return new DefaultOAuth2UserService();
 		}
+		// 否则 存在自定义OauthUser的类型时 ..
 		List<OAuth2UserService<OAuth2UserRequest, OAuth2User>> userServices = new ArrayList<>();
+
 		userServices.add(new CustomUserTypesOAuth2UserService(this.userInfoEndpointConfig.customUserTypes));
+		// 这是为了支持它默认的clientRegistration的 provider authorize ...
 		userServices.add(new DefaultOAuth2UserService());
 		return new DelegatingOAuth2UserService<>(userServices);
 	}
@@ -473,19 +576,30 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getLoginLinks() {
 		Iterable<ClientRegistration> clientRegistrations = null;
+		// 授权从 builder中获取 ClientRegistrationRepository(这个是必须需要的) ..
+		// 配置器上说明也告诉我们了 ..
 		ClientRegistrationRepository clientRegistrationRepository = OAuth2ClientConfigurerUtils
 				.getClientRegistrationRepository(this.getBuilder());
+		// 将对应的实例 对应的ResolvableType 转换为 另一种 ResolvableType ..
 		ResolvableType type = ResolvableType.forInstance(clientRegistrationRepository).as(Iterable.class);
+		// 如果它不是NONE,并且 泛型参数对应了 ClientRegistration
 		if (type != ResolvableType.NONE && ClientRegistration.class.isAssignableFrom(type.resolveGenerics()[0])) {
+			// 直接强转 ..
 			clientRegistrations = (Iterable<ClientRegistration>) clientRegistrationRepository;
 		}
+		// 否则 创建 一个空的map ..
 		if (clientRegistrations == null) {
 			return Collections.emptyMap();
 		}
+		//获取授权请求base URI ..
 		String authorizationRequestBaseUri = (this.authorizationEndpointConfig.authorizationRequestBaseUri != null)
 				? this.authorizationEndpointConfig.authorizationRequestBaseUri
 				: OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
+
+		// 进行登录的连接(对应的Url 表示对应的 client 登录) ..
 		Map<String, String> loginUrlToClientName = new HashMap<>();
+
+		// 遍历 clientRegistrations ..判断授权授予类型是否是 授权码,如果是 ... 则拼接 ..
 		clientRegistrations.forEach((registration) -> {
 			if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(registration.getAuthorizationGrantType())) {
 				String authorizationRequestUri = authorizationRequestBaseUri + "/" + registration.getRegistrationId();
@@ -495,31 +609,54 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 		return loginUrlToClientName;
 	}
 
+	// 获取自动重定向登录url的 认证端点 ..
 	private AuthenticationEntryPoint getLoginEntryPoint(B http, String providerLoginPage) {
 		RequestMatcher loginPageMatcher = new AntPathRequestMatcher(this.getLoginPage());
 		RequestMatcher faviconMatcher = new AntPathRequestMatcher("/favicon.ico");
+		// 这是默认的 ..
 		RequestMatcher defaultEntryPointMatcher = this.getAuthenticationEntryPointMatcher(http);
+
+		// 这些应该是默认放行的 ...(例如login page / favicon.ico)
 		RequestMatcher defaultLoginPageMatcher = new AndRequestMatcher(
 				new OrRequestMatcher(loginPageMatcher, faviconMatcher), defaultEntryPointMatcher);
+
 		RequestMatcher notXRequestedWith = new NegatedRequestMatcher(
 				new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"));
 		LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> entryPoints = new LinkedHashMap<>();
+
+		// 所以它需要匹配的是非登录页面 / 非 favicon.ico的非 ajax请求 ...
 		entryPoints.put(new AndRequestMatcher(notXRequestedWith, new NegatedRequestMatcher(defaultLoginPageMatcher)),
+				// 将它转发到这个认证端点,也就是提供者的登录url ..
 				new LoginUrlAuthenticationEntryPoint(providerLoginPage));
+
+		// 创建一个代理的认证端点 ..
 		DelegatingAuthenticationEntryPoint loginEntryPoint = new DelegatingAuthenticationEntryPoint(entryPoints);
+		// 如果没有匹配上任意一个,那么 使用默认的认证端点 ..
+		// 同样你可以设置默认兜底的认证端点 ...
 		loginEntryPoint.setDefaultEntryPoint(this.getAuthenticationEntryPoint());
 		return loginEntryPoint;
 	}
 
 	/**
 	 * Configuration options for the Authorization Server's Authorization Endpoint.
+	 *
+	 * 配置授权服务器的授权端点
 	 */
 	public final class AuthorizationEndpointConfig {
 
+		/**
+		 * 授权请求的基本uri ...
+		 */
 		private String authorizationRequestBaseUri;
 
+		/**
+		 * 授权服务请求解析器
+		 */
 		private OAuth2AuthorizationRequestResolver authorizationRequestResolver;
 
+		/**
+		 * 授权请求仓库 ..
+		 */
 		private AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository;
 
 		private AuthorizationEndpointConfig() {
@@ -576,6 +713,8 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 
 	/**
 	 * Configuration options for the Authorization Server's Token Endpoint.
+	 *
+	 * 配置授权服务器的 token 端点 ...
 	 */
 	public final class TokenEndpointConfig {
 
@@ -645,8 +784,10 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 	 */
 	public final class UserInfoEndpointConfig {
 
+		// 如果我们配置了如何进行 通过token 访问一个用户信息 ..
 		private OAuth2UserService<OAuth2UserRequest, OAuth2User> userService;
 
+		// 如果我们配置了如何通过 open connect id 访问 一个用户信息 ...
 		private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService;
 
 		private Map<String, Class<? extends OAuth2User>> customUserTypes = new HashMap<>();
@@ -721,6 +862,7 @@ public final class OAuth2LoginConfigurer<B extends HttpSecurityBuilder<B>>
 
 	}
 
+	// 如果存在 oidc ,直接抛出异常,不支持 ... 需要添加依赖 ..
 	private static class OidcAuthenticationRequestChecker implements AuthenticationProvider {
 
 		@Override

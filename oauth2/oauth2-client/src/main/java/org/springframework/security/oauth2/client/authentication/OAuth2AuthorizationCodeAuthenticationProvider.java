@@ -32,10 +32,15 @@ import org.springframework.util.Assert;
  * An implementation of an {@link AuthenticationProvider} for the OAuth 2.0 Authorization
  * Code Grant.
  *
+ * authorization code grant 的 认证提供者实现 ...
+ *
  * <p>
  * This {@link AuthenticationProvider} is responsible for authenticating an Authorization
  * Code credential with the Authorization Server's Token Endpoint and if valid, exchanging
  * it for an Access Token credential.
+ *
+ *
+ * 这个认证提供器负责 认证一个授权码凭证(通过授权服务器的 token端点,并交换一个访问token 凭证) ..
  *
  * @author Joe Grandja
  * @since 5.1
@@ -71,20 +76,31 @@ public class OAuth2AuthorizationCodeAuthenticationProvider implements Authentica
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		OAuth2AuthorizationCodeAuthenticationToken authorizationCodeAuthentication = (OAuth2AuthorizationCodeAuthenticationToken) authentication;
+		// 授权响应  ..
 		OAuth2AuthorizationResponse authorizationResponse = authorizationCodeAuthentication.getAuthorizationExchange()
 				.getAuthorizationResponse();
+
+		// 如果有状态错误 ... 抛出异常 ...
 		if (authorizationResponse.statusError()) {
 			throw new OAuth2AuthorizationException(authorizationResponse.getError());
 		}
+
+		// 授权请求 ..
 		OAuth2AuthorizationRequest authorizationRequest = authorizationCodeAuthentication.getAuthorizationExchange()
 				.getAuthorizationRequest();
+
+		// 两者状态不一致 ... 报错
 		if (!authorizationResponse.getState().equals(authorizationRequest.getState())) {
 			OAuth2Error oauth2Error = new OAuth2Error(INVALID_STATE_PARAMETER_ERROR_CODE);
 			throw new OAuth2AuthorizationException(oauth2Error);
 		}
+
+		// 访问 token 响应客户端获取 一个token 响应 ...
 		OAuth2AccessTokenResponse accessTokenResponse = this.accessTokenResponseClient.getTokenResponse(
 				new OAuth2AuthorizationCodeGrantRequest(authorizationCodeAuthentication.getClientRegistration(),
 						authorizationCodeAuthentication.getAuthorizationExchange()));
+
+		// 然后重新生成 ...
 		OAuth2AuthorizationCodeAuthenticationToken authenticationResult = new OAuth2AuthorizationCodeAuthenticationToken(
 				authorizationCodeAuthentication.getClientRegistration(),
 				authorizationCodeAuthentication.getAuthorizationExchange(), accessTokenResponse.getAccessToken(),

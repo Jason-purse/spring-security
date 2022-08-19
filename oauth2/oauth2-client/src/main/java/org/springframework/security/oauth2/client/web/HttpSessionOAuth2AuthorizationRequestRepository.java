@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
  * An implementation of an {@link AuthorizationRequestRepository} that stores
  * {@link OAuth2AuthorizationRequest} in the {@code HttpSession}.
  *
+ * 这个授权请求仓库实现,将 OAuth2AuthorizationRequest 存储在HttpSession中 ..
+ *
  * @author Joe Grandja
  * @author Rob Winch
  * @author Craig Andrews

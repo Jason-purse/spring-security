@@ -26,6 +26,9 @@ import jakarta.servlet.http.HttpServletRequest;
  * Placed into a separate class for visibility, so that changes to URL formatting
  * conventions will affect all users.
  *
+ * 组合URL 提供了静态方法 ..
+ * 放置在单独的类是为了可见性,因此改变URL 格式约定将会影响所有的用户 ...
+ *
  * @author Ben Alex
  */
 public final class UrlUtils {

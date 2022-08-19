@@ -25,6 +25,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenRespon
  * Authorization Code) for an access token credential at the Authorization Server's Token
  * Endpoint.
  *
+ * 一个策略(为了交换 一个授权授予凭证(例如 授权码)) 为了在授权服务器的 token 端点处获取一个 访问 token 凭证 ...
+ *
  * @author Joe Grandja
  * @since 5.0
  * @see AbstractOAuth2AuthorizationGrantRequest

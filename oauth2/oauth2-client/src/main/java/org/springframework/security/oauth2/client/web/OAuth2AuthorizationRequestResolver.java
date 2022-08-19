@@ -26,6 +26,9 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
  * by the {@link OAuth2AuthorizationRequestRedirectFilter} for resolving Authorization
  * Requests.
  *
+ * 这个接口的实现 有能力解析OAuth2AuthorizationRequest (从提供的HttpServletRequest) ..
+ * 被OAuth2AuthorizationRequestRedirectFilter 用来解析授权 请求 ...
+ *
  * @author Joe Grandja
  * @author Rob Winch
  * @since 5.1

@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Implements "saved request" logic, allowing a single request to be retrieved and
  * restarted after redirecting to an authentication mechanism.
  *
+ * 用来保留请求逻辑,在重定向 认证机制完成之后 ,重演 ..
  * @author Luke Taylor
  * @since 3.0
  */

@@ -34,6 +34,9 @@ import org.springframework.util.Assert;
  * anonymous). The default {@code OAuth2AuthorizedClientRepository} is
  * {@link HttpSessionOAuth2AuthorizedClientRepository}.
  *
+ * 这个实现将代理到提供的 OAuth2AuthorizedClientService (如果当前的身份已经认证),否则如果当前请求没有认证(或者匿名用户)那么代理到 默认的 / 提供的 OAuth2AuthorizedClientRepository ...
+ * 默认的 OAuth2AuthorizedClientRepository 是 HttpSessionOAuth2AuthorizedClientRepository
+ *
  * @author Joe Grandja
  * @since 5.1
  * @see OAuth2AuthorizedClientRepository
@@ -45,8 +48,10 @@ public final class AuthenticatedPrincipalOAuth2AuthorizedClientRepository implem
 
 	private final AuthenticationTrustResolver authenticationTrustResolver = new AuthenticationTrustResolverImpl();
 
+	// 授权了的 ...
 	private final OAuth2AuthorizedClientService authorizedClientService;
 
+	// 没有授权的 ..
 	private OAuth2AuthorizedClientRepository anonymousAuthorizedClientRepository = new HttpSessionOAuth2AuthorizedClientRepository();
 
 	/**

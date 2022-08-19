@@ -226,6 +226,7 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 
 	@Override
 	public void init(B http) throws Exception {
+		// 更新默认认证信息的原因是 它默认get login 页面进行登录 Post login 校验 ..
 		updateAuthenticationDefaults();
 		updateAccessDefaults(http);
 		registerDefaultAuthenticationEntryPoint(http);
@@ -246,15 +247,26 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 				getAuthenticationEntryPointMatcher(http));
 	}
 
+
+	// 获取认证端点匹配器 ...
 	protected final RequestMatcher getAuthenticationEntryPointMatcher(B http) {
+		// 还有内容协商策略 ..
 		ContentNegotiationStrategy contentNegotiationStrategy = http.getSharedObject(ContentNegotiationStrategy.class);
 		if (contentNegotiationStrategy == null) {
+			// 根据header 解析有哪些 media-type ...
 			contentNegotiationStrategy = new HeaderContentNegotiationStrategy();
 		}
+
+		//  需要匹配的 一些mediaType 匹配器 ... 普通html / text_plain ...
 		MediaTypeRequestMatcher mediaMatcher = new MediaTypeRequestMatcher(contentNegotiationStrategy,
 				MediaType.APPLICATION_XHTML_XML, new MediaType("image", "*"), MediaType.TEXT_HTML,
 				MediaType.TEXT_PLAIN);
+
+		// 忽略一些 媒体类型
 		mediaMatcher.setIgnoredMediaTypes(Collections.singleton(MediaType.ALL));
+
+
+		// 非 ajax 请求 ..
 		RequestMatcher notXRequestedWith = new NegatedRequestMatcher(
 				new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"));
 		return new AndRequestMatcher(Arrays.asList(notXRequestedWith, mediaMatcher));
@@ -387,6 +399,7 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 	 */
 	protected final void updateAccessDefaults(B http) {
 		if (this.permitAll) {
+			// 授权那些可以直接允许 ..
 			PermitAllSupport.permitAll(http, this.loginPage, this.loginProcessingUrl, this.failureUrl);
 		}
 	}
@@ -397,6 +410,8 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 	 */
 	private void setLoginPage(String loginPage) {
 		this.loginPage = loginPage;
+		// 设置登录页面,就设置一个关于登录页面的 认证端点 ...
+		// 它基于 https 保证登录安全 ...
 		this.authenticationEntryPoint = new LoginUrlAuthenticationEntryPoint(loginPage);
 	}
 

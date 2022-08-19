@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for the OAuth 2.0 Client {@link AbstractHttpConfigurer}'s.
  *
+ * OAuth 2.0 客户端  AbstractHttpConfigurer 的工具方法 ..
  * @author Joe Grandja
  * @since 5.1
  */
@@ -41,9 +42,12 @@ final class OAuth2ClientConfigurerUtils {
 	private OAuth2ClientConfigurerUtils() {
 	}
 
+	// 尝试从构建者中获取 ClientRegistrationRepository
 	static <B extends HttpSecurityBuilder<B>> ClientRegistrationRepository getClientRegistrationRepository(B builder) {
 		ClientRegistrationRepository clientRegistrationRepository = builder
 				.getSharedObject(ClientRegistrationRepository.class);
+
+		// 如果没有,则从容器中获取,这也就是前面的 OAuth2LoginConfigurer 告诉我们需要配置这样的一个bean ...
 		if (clientRegistrationRepository == null) {
 			clientRegistrationRepository = getClientRegistrationRepositoryBean(builder);
 			builder.setSharedObject(ClientRegistrationRepository.class, clientRegistrationRepository);
@@ -53,9 +57,11 @@ final class OAuth2ClientConfigurerUtils {
 
 	private static <B extends HttpSecurityBuilder<B>> ClientRegistrationRepository getClientRegistrationRepositoryBean(
 			B builder) {
+		// 从容器获取 ...
 		return builder.getSharedObject(ApplicationContext.class).getBean(ClientRegistrationRepository.class);
 	}
 
+	// 获取授权客户端(主要职责就是代表用户去访问 用户的受保护资源)仓库 ..
 	static <B extends HttpSecurityBuilder<B>> OAuth2AuthorizedClientRepository getAuthorizedClientRepository(
 			B builder) {
 		OAuth2AuthorizedClientRepository authorizedClientRepository = builder
@@ -63,14 +69,17 @@ final class OAuth2ClientConfigurerUtils {
 		if (authorizedClientRepository == null) {
 			authorizedClientRepository = getAuthorizedClientRepositoryBean(builder);
 			if (authorizedClientRepository == null) {
+				// 如果没有,则自动创建一个 ..
 				authorizedClientRepository = new AuthenticatedPrincipalOAuth2AuthorizedClientRepository(
 						getAuthorizedClientService((builder)));
 			}
+			// 并设置 ..
 			builder.setSharedObject(OAuth2AuthorizedClientRepository.class, authorizedClientRepository);
 		}
 		return authorizedClientRepository;
 	}
 
+	// 尝试从上下文中获取 ...
 	private static <B extends HttpSecurityBuilder<B>> OAuth2AuthorizedClientRepository getAuthorizedClientRepositoryBean(
 			B builder) {
 		Map<String, OAuth2AuthorizedClientRepository> authorizedClientRepositoryMap = BeanFactoryUtils
