@@ -57,6 +57,9 @@ public interface OAuth2AuthorizedClientService {
 	 * {@link Authentication} (Resource Owner).
 	 * @param authorizedClient the authorized client
 	 * @param principal the End-User {@link Authentication} (Resource Owner)
+	 *
+	 *
+	 *  保存授权完成的客户端关联到 提供的最终用户
 	 */
 	void saveAuthorizedClient(OAuth2AuthorizedClient authorizedClient, Authentication principal);
 

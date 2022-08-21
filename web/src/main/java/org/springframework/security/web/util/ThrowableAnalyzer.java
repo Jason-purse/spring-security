@@ -159,7 +159,7 @@ public class ThrowableAnalyzer {
 		Throwable currentThrowable = throwable;
 		while (currentThrowable != null) {
 			chain.add(currentThrowable);
-			currentThrowable = extractCause(currentThrowable);
+			currentThrowable = extractCause (currentThrowable);
 		}
 		return chain.toArray(new Throwable[0]);
 	}

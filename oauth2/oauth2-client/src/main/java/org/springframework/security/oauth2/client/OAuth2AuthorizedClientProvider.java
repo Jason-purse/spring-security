@@ -25,6 +25,8 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
  * will typically implement a specific {@link AuthorizationGrantType authorization grant}
  * type.
  *
+ * 用来授权 / 重新授权一个OAuth2 Client的策略,实现通常实现特定的授权授予类型 ...
+ *
  * @author Joe Grandja
  * @since 5.2
  * @see OAuth2AuthorizedClient

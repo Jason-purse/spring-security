@@ -274,6 +274,9 @@ public final class OAuth2AuthorizationRequest implements Serializable {
 			// The supplied authorizationUri may contain encoded parameters
 			// so disable encoding in UriBuilder and instead apply encoding within this
 			// builder
+
+			// 也就是取消 uriBuilderFactory的编码 ..
+			// 在当前Builder对象中应用编码 ..
 			this.uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 		}
 
@@ -445,6 +448,7 @@ public final class OAuth2AuthorizationRequest implements Serializable {
 			if (AuthorizationGrantType.IMPLICIT.equals(this.authorizationGrantType)) {
 				Assert.hasText(this.redirectUri, "redirectUri cannot be empty");
 			}
+			// 授权请求 ...
 			OAuth2AuthorizationRequest authorizationRequest = new OAuth2AuthorizationRequest();
 			authorizationRequest.authorizationUri = this.authorizationUri;
 			authorizationRequest.authorizationGrantType = this.authorizationGrantType;
@@ -461,6 +465,7 @@ public final class OAuth2AuthorizationRequest implements Serializable {
 			return authorizationRequest;
 		}
 
+		// 构建授权请求 uri ...
 		private String buildAuthorizationRequestUri() {
 			Map<String, Object> parameters = getParameters(); // Not encoded
 			this.parametersConsumer.accept(parameters);

@@ -311,6 +311,7 @@ public class JdbcOAuth2AuthorizedClientService implements OAuth2AuthorizedClient
 
 		@Override
 		public List<SqlParameterValue> apply(OAuth2AuthorizedClientHolder authorizedClientHolder) {
+
 			OAuth2AuthorizedClient authorizedClient = authorizedClientHolder.getAuthorizedClient();
 			Authentication principal = authorizedClientHolder.getPrincipal();
 			ClientRegistration clientRegistration = authorizedClient.getClientRegistration();

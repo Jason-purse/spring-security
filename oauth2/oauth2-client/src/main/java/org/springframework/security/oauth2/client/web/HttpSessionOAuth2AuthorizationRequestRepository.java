@@ -70,8 +70,11 @@ public final class HttpSessionOAuth2AuthorizationRequestRepository
 			this.removeAuthorizationRequest(request, response);
 			return;
 		}
+		// 获取状态 ...
 		String state = authorizationRequest.getState();
 		Assert.hasText(state, "authorizationRequest.state cannot be empty");
+
+		// 允许多个授权请求 ...
 		if (this.allowMultipleAuthorizationRequests) {
 			Map<String, OAuth2AuthorizationRequest> authorizationRequests = this.getAuthorizationRequests(request);
 			authorizationRequests.put(state, authorizationRequest);

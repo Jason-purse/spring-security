@@ -56,6 +56,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * overridden via it's constructor
  * {@link #DefaultOAuth2AuthorizationRequestResolver(ClientRegistrationRepository, String)}.
  *
+ * 默认的OAuth2 授权请求解析器实现,尝试从提供的request上解析一个 OAuth2AuthorizationRequest  ...
+ * 通过默认的请求 URI 模式(/oauth2/authorization/{registrationId})
+ *
  * @author Joe Grandja
  * @author Rob Winch
  * @author Eddú Meléndez
@@ -100,11 +103,15 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 
 	@Override
 	public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
+		// 根据请求解析 registrationId ...
 		String registrationId = this.resolveRegistrationId(request);
 		if (registrationId == null) {
 			return null;
 		}
+		// 重定向 url 动作 ...(action 动作也是可以设定的,直接给定action parameter ..)
 		String redirectUriAction = getAction(request, "login");
+
+		// 然后解析处请求 ...
 		return resolve(request, registrationId, redirectUriAction);
 	}
 
@@ -143,16 +150,22 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 		if (registrationId == null) {
 			return null;
 		}
+		// 尝试从仓库中发现 ...
 		ClientRegistration clientRegistration = this.clientRegistrationRepository.findByRegistrationId(registrationId);
 		if (clientRegistration == null) {
 			throw new IllegalArgumentException("Invalid Client Registration with Id: " + registrationId);
 		}
+
 		Map<String, Object> attributes = new HashMap<>();
 		attributes.put(OAuth2ParameterNames.REGISTRATION_ID, clientRegistration.getRegistrationId());
+
+		// 获取授权请求 builder ...
 		OAuth2AuthorizationRequest.Builder builder = getBuilder(clientRegistration, attributes);
 
+		// 解析好重定向请求 ..
 		String redirectUriStr = expandRedirectUri(request, clientRegistration, redirectUriAction);
 
+		// 根据给定的clientRegistration 指定 授权Uri ... 等相关信息 ...
 		// @formatter:off
 		builder.clientId(clientRegistration.getClientId())
 				.authorizationUri(clientRegistration.getProviderDetails().getAuthorizationUri())
@@ -162,13 +175,16 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 				.attributes(attributes);
 		// @formatter:on
 
+		// 我们可以设置授权请求定制器 进行定制,例如加上额外的信息 ...
 		this.authorizationRequestCustomizer.accept(builder);
 
 		return builder.build();
 	}
 
+	// 构造 一个oauth2 授权请求 ..
 	private OAuth2AuthorizationRequest.Builder getBuilder(ClientRegistration clientRegistration,
 			Map<String, Object> attributes) {
+		// 必须是授权码 ... 否则是隐式的,否则不支持 ...
 		if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(clientRegistration.getAuthorizationGrantType())) {
 			OAuth2AuthorizationRequest.Builder builder = OAuth2AuthorizationRequest.authorizationCode();
 			Map<String, Object> additionalParameters = new HashMap<>();
@@ -180,12 +196,15 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 				// value.
 				addNonceParameters(attributes, additionalParameters);
 			}
+
+			// 客户端认证 方法 ...
 			if (ClientAuthenticationMethod.NONE.equals(clientRegistration.getClientAuthenticationMethod())) {
 				addPkceParameters(attributes, additionalParameters);
 			}
 			builder.additionalParameters(additionalParameters);
 			return builder;
 		}
+
 		if (AuthorizationGrantType.IMPLICIT.equals(clientRegistration.getAuthorizationGrantType())) {
 			return OAuth2AuthorizationRequest.implicit();
 		}
@@ -217,6 +236,8 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 	 * <p/>
 	 * Default redirectUri is:
 	 * {@code org.springframework.security.config.oauth2.client.CommonOAuth2Provider#DEFAULT_REDIRECT_URL}
+	 *
+	 * 这个方法用来解析 redirectUri ...(我们可用的变量全在这里) ...
 	 * @return expanded URI
 	 */
 	private static String expandRedirectUri(HttpServletRequest request, ClientRegistration clientRegistration,
@@ -282,6 +303,9 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 	 * usually, {@link PkceParameterNames#CODE_CHALLENGE_METHOD} are added to be used in
 	 * the authorization request.
 	 *
+	 * 创建并增加额外的 PKCE 参数(将被用在 oauth2 授权以及访问 token 请求中) ...
+	 *
+	 *
 	 * @since 5.2
 	 * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7636#section-1.1">1.1.
 	 * Protocol Flow</a>
@@ -303,6 +327,8 @@ public final class DefaultOAuth2AuthorizationRequestResolver implements OAuth2Au
 		}
 	}
 
+
+	// 创建hash ..使用SHA-256 进行加密 。。
 	private static String createHash(String value) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		byte[] digest = md.digest(value.getBytes(StandardCharsets.US_ASCII));

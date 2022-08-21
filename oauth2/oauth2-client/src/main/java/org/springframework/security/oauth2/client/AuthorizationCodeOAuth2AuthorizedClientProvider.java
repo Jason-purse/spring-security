@@ -45,6 +45,8 @@ public final class AuthorizationCodeOAuth2AuthorizedClientProvider implements OA
 	 * @throws ClientAuthorizationRequiredException in order to trigger authorization in
 	 * which the {@link OAuth2AuthorizationRequestRedirectFilter} will catch and initiate
 	 * the authorization request
+	 *
+	 * 尝试授权,但是发现授权
 	 */
 	@Override
 	@Nullable

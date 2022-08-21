@@ -33,6 +33,8 @@ import org.springframework.util.CollectionUtils;
  * {@link OAuth2AuthorizedClientProvider} when attempting to authorize (or re-authorize)
  * an OAuth 2.0 Client.
  *
+ * 它持有特定的授权状态的上下文(由 OAuth2AuthorizedClientProvider用来尝试授权或者重新授权(例如它token 过期了) ...
+ *
  * @author Joe Grandja
  * @since 5.2
  * @see OAuth2AuthorizedClientProvider

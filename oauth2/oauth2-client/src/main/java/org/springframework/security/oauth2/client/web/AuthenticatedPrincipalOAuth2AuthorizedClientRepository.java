@@ -90,10 +90,12 @@ public final class AuthenticatedPrincipalOAuth2AuthorizedClientRepository implem
 	@Override
 	public void saveAuthorizedClient(OAuth2AuthorizedClient authorizedClient, Authentication principal,
 			HttpServletRequest request, HttpServletResponse response) {
+		// 判断 身份是否认证成功 ...
 		if (this.isPrincipalAuthenticated(principal)) {
 			this.authorizedClientService.saveAuthorizedClient(authorizedClient, principal);
 		}
 		else {
+			// 不需要保存 ...
 			this.anonymousAuthorizedClientRepository.saveAuthorizedClient(authorizedClient, principal, request,
 					response);
 		}

@@ -80,6 +80,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * 通过它初始化一个 授权码授予流 ...
  *
+ * 然后重定向授权响应在哪里 ...(OAuth2LoginAuthenticationFilter)
+ *
  * @author Joe Grandja
  * @author Rob Winch
  * @since 5.0
@@ -115,6 +117,9 @@ public class OAuth2AuthorizationRequestRedirectFilter extends OncePerRequestFilt
 
 	private AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository = new HttpSessionOAuth2AuthorizationRequestRepository();
 
+	/**
+	 * 它使用了一个请求Cache ...
+	 */
 	private RequestCache requestCache = new HttpSessionRequestCache();
 
 	/**
@@ -178,6 +183,7 @@ public class OAuth2AuthorizationRequestRedirectFilter extends OncePerRequestFilt
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		try {
+			// 先解析,是否为一个授权请求 ...
 			OAuth2AuthorizationRequest authorizationRequest = this.authorizationRequestResolver.resolve(request);
 			if (authorizationRequest != null) {
 				this.sendRedirectForAuthorization(request, response, authorizationRequest);
@@ -196,6 +202,7 @@ public class OAuth2AuthorizationRequestRedirectFilter extends OncePerRequestFilt
 		}
 		catch (Exception ex) {
 			// Check to see if we need to handle ClientAuthorizationRequiredException
+			// 判断一个 ClientAuthorizationRequiredException 认证异常 ..
 			Throwable[] causeChain = this.throwableAnalyzer.determineCauseChain(ex);
 			ClientAuthorizationRequiredException authzEx = (ClientAuthorizationRequiredException) this.throwableAnalyzer
 					.getFirstThrowableOfType(ClientAuthorizationRequiredException.class, causeChain);

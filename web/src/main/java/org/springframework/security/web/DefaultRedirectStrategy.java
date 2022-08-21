@@ -52,6 +52,8 @@ public class DefaultRedirectStrategy implements RedirectStrategy {
 	@Override
 	public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {
 		String redirectUrl = calculateRedirectUrl(request.getContextPath(), url);
+		// 进行url 重写(例如环境判断,是否存在session ... 浏览器是否支持 cookie) ..
+		// 例如将 sessionId 拼接到 url中(例如session被禁用的情况) ..
 		redirectUrl = response.encodeRedirectURL(redirectUrl);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(LogMessage.format("Redirecting to %s", redirectUrl));

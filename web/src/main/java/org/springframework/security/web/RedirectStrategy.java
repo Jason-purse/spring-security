@@ -25,6 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
  * Encapsulates the redirection logic for all classes in the framework which perform
  * redirects.
  *
+ * 重定向策略 ..
+ *
  * @author Luke Taylor
  * @since 3.0
  */

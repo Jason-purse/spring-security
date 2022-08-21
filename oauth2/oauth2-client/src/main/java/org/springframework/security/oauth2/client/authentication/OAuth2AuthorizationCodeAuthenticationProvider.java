@@ -59,6 +59,9 @@ public class OAuth2AuthorizationCodeAuthenticationProvider implements Authentica
 
 	private static final String INVALID_STATE_PARAMETER_ERROR_CODE = "invalid_state_parameter";
 
+	/**
+	 * 从响应中获取访问 token的客户端 ...
+	 */
 	private final OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient;
 
 	/**
@@ -100,7 +103,8 @@ public class OAuth2AuthorizationCodeAuthenticationProvider implements Authentica
 				new OAuth2AuthorizationCodeGrantRequest(authorizationCodeAuthentication.getClientRegistration(),
 						authorizationCodeAuthentication.getAuthorizationExchange()));
 
-		// 然后重新生成 ...
+		// 然后重新生成  token...
+		// 然后这个token 就可以用来交换用户信息 ...
 		OAuth2AuthorizationCodeAuthenticationToken authenticationResult = new OAuth2AuthorizationCodeAuthenticationToken(
 				authorizationCodeAuthentication.getClientRegistration(),
 				authorizationCodeAuthentication.getAuthorizationExchange(), accessTokenResponse.getAccessToken(),

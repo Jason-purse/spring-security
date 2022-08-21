@@ -55,6 +55,7 @@ final class OAuth2AuthorizationResponseUtils {
 		return isAuthorizationResponseSuccess(request) || isAuthorizationResponseError(request);
 	}
 
+	// 授权请求响应成功 ...
 	static boolean isAuthorizationResponseSuccess(MultiValueMap<String, String> request) {
 		return StringUtils.hasText(request.getFirst(OAuth2ParameterNames.CODE))
 				&& StringUtils.hasText(request.getFirst(OAuth2ParameterNames.STATE));

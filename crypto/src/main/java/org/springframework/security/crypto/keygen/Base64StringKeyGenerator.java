@@ -22,6 +22,8 @@ import java.util.Base64;
  * A StringKeyGenerator that generates base64-encoded String keys. Delegates to a
  * {@link BytesKeyGenerator} for the actual key generation.
  *
+ * 这个字符串生成器 生成基于base64的字符串 key,代理到ByteKeyGenerator ... 进行 key 生成 ..
+ *
  * @author Joe Grandja
  * @author Rob Winch
  * @since 5.0

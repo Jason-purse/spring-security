@@ -105,7 +105,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Response</a>
  *
  *
- * 也就是说此类是 OAuth2 登录授权的入口 ...
+ * 也就是说此类是 OAuth2 登录授权的入口 ... (它接收一个 OAuth2授权请求的响应结果) ... 然后开始授权流 ...
  */
 public class OAuth2LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -190,6 +190,7 @@ public class OAuth2LoginAuthenticationFilter extends AbstractAuthenticationProce
 
 		MultiValueMap<String, String> params = OAuth2AuthorizationResponseUtils.toMultiMap(request.getParameterMap());
 
+		// 如果不是,直接抛出一个异常 ....
 		if (!OAuth2AuthorizationResponseUtils.isAuthorizationResponse(params)) {
 			OAuth2Error oauth2Error = new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST);
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
@@ -219,6 +220,7 @@ public class OAuth2LoginAuthenticationFilter extends AbstractAuthenticationProce
 
 		// 如果一切正常 ...
 		// @formatter:off
+		// 重定向回来的地址 ..
 		String redirectUri = UriComponentsBuilder.fromHttpUrl(UrlUtils.buildFullRequestUrl(request))
 				.replaceQuery(null)
 				.build()

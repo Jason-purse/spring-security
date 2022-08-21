@@ -46,6 +46,8 @@ import org.springframework.security.web.session.SessionManagementFilter;
 /**
  * 它的意思就是为 HttpSecurity 配置  DefaultSecurityFilterChain
  *
+ * 这个接口 给定了 各种过滤器的顺序 ...
+ *
  * @param <H>
  * @author Rob Winch
  */
